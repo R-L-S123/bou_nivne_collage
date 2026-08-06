@@ -47,7 +47,9 @@ def finish_authentication(code_verifier):
         authorization_response=request.url
     )
 
-    return flow.credentialsdef create_picker_session(creds):
+    return flow.credentials
+    
+def create_picker_session(creds):
 
     response = requests.post(
         "https://photospicker.googleapis.com/v1/sessions",
