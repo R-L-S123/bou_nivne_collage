@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, session
 import json
 from flask import send_file
 import io
@@ -10,6 +10,7 @@ from main import create_auth_flow
 
 
 app = Flask(__name__)
+app.secret_key = "change-this-secret-key"
 
 
 @app.route("/photo/<int:index>")
@@ -72,7 +73,7 @@ def home():
         photos=photos,
         collage_version=time.time()
     )
-
+    
 @app.route("/import")
 def import_google_photos():
 
@@ -83,14 +84,18 @@ def import_google_photos():
         include_granted_scopes="true"
     )
 
-    return redirect(authorization_url)
+    session["code_verifier"] = flow.code_verifier
 
+    return redirect(authorization_url)
+    
 @app.route("/oauth/callback")
 def oauth_callback():
 
     from main import finish_authentication
 
-    creds = finish_authentication()
+    creds = finish_authentication(
+        session["code_verifier"]
+    )
 
     with open("token.json", "w") as f:
         f.write(creds.to_json())
