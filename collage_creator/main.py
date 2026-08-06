@@ -17,15 +17,14 @@ SCOPES = [
 def authenticate():
 
     creds = None
-
-    try:
-        creds = Credentials.from_authorized_user_file(
-            "token.json",
+    
+    token_data = os.environ.get("GOOGLE_TOKEN")
+    
+    if token_data:
+        creds = Credentials.from_authorized_user_info(
+            json.loads(token_data),
             SCOPES
         )
-    except:
-        pass
-
 
     if not creds or not creds.valid:
 
@@ -48,8 +47,7 @@ def authenticate():
             )
 
 
-        with open("token.json", "w") as f:
-            f.write(creds.to_json())
+        os.environ["GOOGLE_TOKEN"] = creds.to_json()
 
 
     return creds
