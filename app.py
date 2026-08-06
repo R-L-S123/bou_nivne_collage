@@ -15,34 +15,15 @@ app.secret_key = "change-this-secret-key"
 @app.route("/finish_import")
 def finish_import():
 
-    from main import (
-        wait_for_selection,
-        get_selected_photos,
-        save_photos_to_json
-    )
-    from google.oauth2.credentials import Credentials
+   if not wait_for_selection(creds, session_id):
+    return {"done": False}
 
-    creds = Credentials(session["access_token"])
-
-    session_id = session["picker_id"]
-
-    wait_for_selection(
-        creds,
-        session_id
-    )
-
-    data = get_selected_photos(
-        creds,
-        session_id
-    )
-
-    photos = save_photos_to_json(
-        data,
-        creds
-    )
-
+    data = get_selected_photos(creds, session_id)
+    
+    photos = save_photos_to_json(data, creds)
+    
     create_collage()
-
+    
     return {"done": True}
 
 
