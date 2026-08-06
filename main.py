@@ -156,39 +156,10 @@ def save_photos_to_json(data, creds):
     return photos
 
 
-
 def import_photos(creds):
 
     session = create_picker_session(
         creds
     )
 
-
-    session_id = session["id"]
-
-
-    # מחזירים את הקישור ל־Google Photos Picker
-    # לא פותחים דפדפן כי זה רץ על Render
-
-    picker_url = session["pickerUri"]
-
-
-    wait_for_selection(
-        creds,
-        session_id
-    )
-
-
-    data = get_selected_photos(
-        creds,
-        session_id
-    )
-
-
-    photos = save_photos_to_json(
-        data,
-        creds
-    )
-
-
-    return photos
+    return session
