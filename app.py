@@ -6,7 +6,7 @@ import requests
 import time
 
 from collage import create_collage
-from main import create_auth_flow
+from main import create_auth_flow, import_photos
 
 
 app = Flask(__name__)
