@@ -68,26 +68,18 @@ def create_picker_session(creds):
 
 def wait_for_selection(creds, session_id):
 
-    while True:
+    response = requests.get(
 
-        response = requests.get(
+        f"https://photospicker.googleapis.com/v1/sessions/{session_id}",
 
-            f"https://photospicker.googleapis.com/v1/sessions/{session_id}",
+        headers={
+            "Authorization": f"Bearer {creds.token}"
+        }
+    )
 
-            headers={
-                "Authorization": f"Bearer {creds.token}"
-            }
-        )
-
-        response.raise_for_status()
-
-        data = response.json()
-
-        if data.get("mediaItemsSet"):
-            break
-
-        time.sleep(2)
-
+    data = response.json()
+    
+    return data.get("mediaItemsSet", False)
 
 
 def get_selected_photos(creds, session_id):
