@@ -161,10 +161,25 @@ def save_photos_to_json(data, creds):
 
     return photos
 
+def get_credentials():
+
+    if os.path.exists("token.json"):
+
+        creds = Credentials.from_authorized_user_file(
+            "token.json",
+            SCOPES
+        )
+
+        return creds
+
+
+    raise Exception(
+        "No credentials found. Please login again."
+    )
 
 def import_photos():
 
-    creds = authenticate()
+    creds = get_credentials()
 
 
     session = create_picker_session(
