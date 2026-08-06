@@ -59,7 +59,7 @@ def create_picker_session(creds):
             "Content-Type": "application/json"
         },
 
-        json={}
+        json={"redirectUri": "https://bou-nivne-collage.onrender.com/picker/complete"}
     )
 
     response.raise_for_status()
