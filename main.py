@@ -27,7 +27,7 @@ def create_auth_flow():
 
 
 
-def finish_authentication(code_verifier):
+def finish_authentication(code_verifier, authorization_response):
 
     credentials_data = json.loads(
         os.environ["GOOGLE_CREDENTIALS"]
@@ -42,7 +42,7 @@ def finish_authentication(code_verifier):
     flow.code_verifier = code_verifier
 
     flow.fetch_token(
-        authorization_response=request.url
+        authorization_response=authorization_response
     )
 
     return flow.credentials
