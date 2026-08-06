@@ -155,12 +155,5 @@ def save_photos_to_json(data, creds):
 
 
 def import_photos(creds):
-
-    response = create_picker_session(creds)
-
-    if response.status_code != 200:
-        raise Exception(response.text)
-
-    session = response.json()
-
+    session = create_picker_session(creds)
     return session
