@@ -59,14 +59,11 @@ def create_picker_session(creds):
         },
         json={}
     )
-    
-    print(response.status_code)
-    print(response.text)
-    
-    response.raise_for_status()
 
-    return response.json()
+    print("STATUS:", response.status_code)
+    print("BODY:", response.text)
 
+    return response
 
 
 def wait_for_selection(creds, session_id):
@@ -159,8 +156,11 @@ def save_photos_to_json(data, creds):
 
 def import_photos(creds):
 
-    session = create_picker_session(
-        creds
-    )
+    response = create_picker_session(creds)
+
+    if response.status_code != 200:
+        raise Exception(response.text)
+
+    session = response.json()
 
     return session
