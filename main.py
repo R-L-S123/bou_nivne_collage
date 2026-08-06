@@ -2,17 +2,14 @@ import requests
 import time
 import os
 import json
-import webbrowser
-from flask import request
 
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
 
 
 SCOPES = [
     "https://www.googleapis.com/auth/photospicker.mediaitems.readonly"
 ]
+
 
 def create_auth_flow():
 
@@ -21,9 +18,10 @@ def create_auth_flow():
     )
 
     flow = InstalledAppFlow.from_client_config(
-    credentials_data,
-    SCOPES,
-    redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback")
+        credentials_data,
+        SCOPES,
+        redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
+    )
 
     return flow
 
@@ -48,7 +46,9 @@ def finish_authentication(code_verifier):
     )
 
     return flow.credentials
-    
+
+
+
 def create_picker_session(creds):
 
     response = requests.post(
@@ -61,7 +61,6 @@ def create_picker_session(creds):
 
         json={}
     )
-
 
     response.raise_for_status()
 
@@ -82,15 +81,12 @@ def wait_for_selection(creds, session_id):
             }
         )
 
-
         response.raise_for_status()
 
         data = response.json()
 
-
         if data.get("mediaItemsSet"):
             break
-
 
         time.sleep(2)
 
@@ -111,7 +107,6 @@ def get_selected_photos(creds, session_id):
         }
     )
 
-
     response.raise_for_status()
 
     return response.json()
@@ -126,7 +121,6 @@ def save_photos_to_json(data, creds):
     for photo in data.get("mediaItems", []):
 
         media_file = photo.get("mediaFile", {})
-
 
         photos.append({
 
@@ -161,40 +155,22 @@ def save_photos_to_json(data, creds):
 
     return photos
 
-def get_credentials():
-
-    if os.path.exists("token.json"):
-
-        creds = Credentials.from_authorized_user_file(
-            "token.json",
-            SCOPES
-        )
-
-        return creds
 
 
-    raise Exception(
-        "No credentials found. Please login again."
-    )
-
-def import_photos():
-
-    creds = get_credentials()
-
+def import_photos(creds):
 
     session = create_picker_session(
         creds
     )
 
 
-    picker_url = session["pickerUri"]
-
-    print("\nפותח את Google Photos Picker...")
-
-    webbrowser.open(picker_url)
-
-
     session_id = session["id"]
+
+
+    # מחזירים את הקישור ל־Google Photos Picker
+    # לא פותחים דפדפן כי זה רץ על Render
+
+    picker_url = session["pickerUri"]
 
 
     wait_for_selection(
@@ -210,30 +186,9 @@ def import_photos():
 
 
     photos = save_photos_to_json(
-        data, creds
+        data,
+        creds
     )
 
 
     return photos
-
-
-
-if __name__ == "__main__":
-
-
-    photos = import_photos()
-
-
-    print("\nנבחרו תמונות:")
-
-    for photo in photos:
-
-        print(
-            photo["id"],
-            photo["date"]
-        )
-
-
-    print(
-        f"\nנשמרו {len(photos)} תמונות"
-    )
