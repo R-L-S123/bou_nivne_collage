@@ -6,7 +6,7 @@ import requests
 import time
 
 from collage import create_collage
-from main import import_photos
+from main import create_auth_flow
 
 
 app = Flask(__name__)
@@ -73,19 +73,38 @@ def home():
         collage_version=time.time()
     )
 
-
 @app.route("/import")
 def import_google_photos():
+
+    flow = create_auth_flow()
+
+    authorization_url, state = flow.authorization_url(
+        access_type="offline",
+        include_granted_scopes="true"
+    )
+
+    return redirect(authorization_url)
+
+@app.route("/oauth/callback")
+def oauth_callback():
+
+    from main import finish_authentication
+
+    creds = finish_authentication()
+
+    with open("token.json", "w") as f:
+        f.write(creds.to_json())
+
 
     photos = import_photos()
 
     if len(photos) < 25:
         return "צריך לפחות 25 תמונות"
 
+
     create_collage()
 
     return redirect("/")
-
 
 @app.route("/download")
 def download():
