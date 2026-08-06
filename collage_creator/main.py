@@ -1,6 +1,7 @@
 import requests
 import time
 import json
+import os
 import webbrowser
 
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -33,8 +34,12 @@ def authenticate():
 
         else:
 
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json",
+            credentials_data = json.loads(
+                os.environ["GOOGLE_CREDENTIALS"]
+            )
+            
+            flow = InstalledAppFlow.from_client_config(
+                credentials_data,
                 SCOPES
             )
 
