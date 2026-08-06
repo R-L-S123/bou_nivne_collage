@@ -106,21 +106,18 @@ def oauth_callback():
         request.url
     )
 
-
-    photos = import_photos(
+    picker_session = import_photos(
         creds
     )
-
-
-    if len(photos) < 25:
-
-        return "צריך לפחות 25 תמונות"
-
-
-    create_collage()
-
-
-    return redirect("/")
+    
+    
+    session["picker_id"] = picker_session["id"]
+    session["access_token"] = creds.token
+    
+    
+    return redirect(
+        picker_session["pickerUri"]
+    )
 
 
 
