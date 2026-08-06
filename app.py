@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, session
+from flask import Flask, render_template, redirect, session, request
 import json
 from flask import send_file
 import io
@@ -6,11 +6,12 @@ import requests
 import time
 
 from collage import create_collage
-from main import create_auth_flow, import_photos
+from main import create_auth_flow, import_photos, finish_authentication
 
 
 app = Flask(__name__)
 app.secret_key = "change-this-secret-key"
+
 
 
 @app.route("/photo/<int:index>")
@@ -39,6 +40,7 @@ def get_photo(index):
         io.BytesIO(response.content),
         mimetype="image/jpeg"
     )
+
 
 
 @app.route("/")
@@ -73,43 +75,54 @@ def home():
         photos=photos,
         collage_version=time.time()
     )
-    
+
+
+
 @app.route("/import")
 def import_google_photos():
 
     flow = create_auth_flow()
+
 
     authorization_url, state = flow.authorization_url(
         access_type="offline",
         include_granted_scopes="true"
     )
 
+
     session["code_verifier"] = flow.code_verifier
 
+
     return redirect(authorization_url)
-    
+
+
+
 @app.route("/oauth/callback")
 def oauth_callback():
 
-    from main import finish_authentication
 
     creds = finish_authentication(
-        session["code_verifier"]
+        session["code_verifier"],
+        request.url
     )
 
-    with open("token.json", "w") as f:
-        f.write(creds.to_json())
 
+    photos = import_photos(
+        creds
+    )
 
-    photos = import_photos()
 
     if len(photos) < 25:
+
         return "צריך לפחות 25 תמונות"
 
 
     create_collage()
 
+
     return redirect("/")
+
+
 
 @app.route("/download")
 def download():
@@ -119,6 +132,8 @@ def download():
         as_attachment=True,
         download_name="heart_collage.png"
     )
+
+
 
 if __name__ == "__main__":
 
