@@ -1,5 +1,6 @@
 import requests
 import time
+import os
 import json
 import webbrowser
 
@@ -33,14 +34,15 @@ def authenticate():
 
         else:
 
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json",
-                SCOPES
-            )
-
+            credentials_data = json.loads(
+            os.environ["GOOGLE_CREDENTIALS"])
+                
+            flow = InstalledAppFlow.from_client_config(
+                credentials_data,
+                SCOPES)
+              
             creds = flow.run_local_server(
-                port=0
-            )
+                port=0)
 
 
         with open("token.json", "w") as f:
