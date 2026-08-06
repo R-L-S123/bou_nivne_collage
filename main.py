@@ -21,9 +21,9 @@ def create_auth_flow():
     )
 
     flow = InstalledAppFlow.from_client_config(
-        credentials_data,
-        SCOPES
-    )
+    credentials_data,
+    SCOPES,
+    redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback")
 
     return flow
 
