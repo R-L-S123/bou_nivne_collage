@@ -119,7 +119,48 @@ def oauth_callback():
         picker_session["pickerUri"]
     )
 
+@app.route("/picker/complete")
+def picker_complete():
 
+    from main import (
+        get_selected_photos,
+        save_photos_to_json
+    )
+
+
+    session_id = session["picker_id"]
+
+    token = session["access_token"]
+
+
+    class TempCreds:
+        def __init__(self, token):
+            self.token = token
+
+
+    creds = TempCreds(token)
+
+
+    data = get_selected_photos(
+        creds,
+        session_id
+    )
+
+
+    photos = save_photos_to_json(
+        data,
+        creds
+    )
+
+
+    if len(photos) < 25:
+        return "צריך לפחות 25 תמונות"
+
+
+    create_collage()
+
+
+    return redirect("/")
 
 @app.route("/download")
 def download():
