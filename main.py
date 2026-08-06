@@ -3,6 +3,7 @@ import time
 import os
 import json
 import webbrowser
+from flask import request
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -13,45 +14,30 @@ SCOPES = [
     "https://www.googleapis.com/auth/photospicker.mediaitems.readonly"
 ]
 
+def create_auth_flow():
 
-def authenticate():
+    credentials_data = json.loads(
+        os.environ["GOOGLE_CREDENTIALS"]
+    )
 
-    creds = None
+    flow = InstalledAppFlow.from_client_config(
+        credentials_data,
+        SCOPES
+    )
 
-    try:
-        creds = Credentials.from_authorized_user_file(
-            "token.json",
-            SCOPES
-        )
-    except:
-        pass
-
-
-    if not creds or not creds.valid:
-
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-
-        else:
-
-            credentials_data = json.loads(
-            os.environ["GOOGLE_CREDENTIALS"])
-                
-            flow = InstalledAppFlow.from_client_config(
-                credentials_data,
-                SCOPES)
-              
-            creds = flow.run_local_server(
-                port=0)
+    return flow
 
 
-        with open("token.json", "w") as f:
-            f.write(creds.to_json())
 
+def finish_authentication(flow):
+
+    flow.fetch_token(
+        authorization_response=request.url
+    )
+
+    creds = flow.credentials
 
     return creds
-
-
 
 def create_picker_session(creds):
 
