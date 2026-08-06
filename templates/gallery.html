@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="he" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+בואו נבנה קולאז'
+</title>
+
+
+<style>
+
+body {
+
+    font-family: Arial;
+    background:#f4f4f4;
+    padding:20px;
+
+}
+
+
+h1, h2 {
+
+    text-align:center;
+
+}
+
+
+
+.button {
+
+    display:block;
+
+    margin:20px auto;
+
+    width:220px;
+
+    text-align:center;
+
+    padding:12px;
+
+    background:black;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:10px;
+
+}
+
+
+
+.download {
+
+    display:inline-block;
+
+    margin:20px auto;
+
+    padding:12px 25px;
+
+    background:#ff4d6d;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:25px;
+
+    font-size:18px;
+
+}
+
+
+
+.collage-container {
+
+    text-align:center;
+
+    display:none;
+
+}
+
+
+
+.collage {
+
+    width:450px;
+
+    max-width:90%;
+
+    border-radius:10px;
+
+}
+
+
+
+.loading {
+
+    text-align:center;
+
+    margin:40px;
+
+}
+
+
+
+.spinner {
+
+    width:50px;
+
+    height:50px;
+
+    border:5px solid #ddd;
+
+    border-top:5px solid #ff4d6d;
+
+    border-radius:50%;
+
+    animation:spin 1s linear infinite;
+
+    margin:auto;
+
+}
+
+
+
+@keyframes spin {
+
+    from {
+        transform:rotate(0deg);
+    }
+
+    to {
+        transform:rotate(360deg);
+    }
+
+}
+
+
+
+.gallery {
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fill,minmax(180px,1fr));
+
+    gap:15px;
+
+}
+
+
+
+.card {
+
+    background:white;
+
+    padding:10px;
+
+    border-radius:10px;
+
+}
+
+
+
+.card img {
+
+    width:100%;
+
+    border-radius:8px;
+
+}
+
+
+
+#error {
+
+    text-align:center;
+
+    color:red;
+
+    display:none;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+<h1>
+📸 בואו נבנה קולאז'
+</h1>
+
+
+
+<a class="button" href="/import">
+ייבא מ-Google Photos
+</a>
+
+
+
+<div id="loading" class="loading">
+
+    <div class="spinner"></div>
+
+    <p>
+    יוצר את הקולאז׳ שלך ❤️
+    </p>
+
+</div>
+
+
+
+<div id="error">
+
+❌ לא הצלחנו לטעון את הקולאז׳
+
+</div>
+
+
+
+<div id="collage-container" class="collage-container">
+
+
+<h2>
+הקולאז' שלך ❤️
+</h2>
+
+
+
+<img
+
+id="collage-image"
+
+class="collage"
+
+src="{{ url_for('static', filename='heart_collage.png') }}?v={{ collage_version }}"
+
+>
+
+
+
+<br>
+
+
+
+<a class="download" href="/download">
+
+⬇ הורד PNG
+
+</a>
+
+
+
+</div>
+
+
+
+
+<div class="gallery">
+
+
+{% for photo in photos %}
+
+
+<div class="card">
+
+
+<img src="/photo/{{ loop.index0 }}">
+
+
+<p>
+{{ photo.date }}
+</p>
+
+
+</div>
+
+
+{% endfor %}
+
+
+
+</div>
+
+
+
+
+<script>
+
+
+const image = document.getElementById(
+    "collage-image"
+);
+
+
+const loading = document.getElementById(
+    "loading"
+);
+
+
+const container = document.getElementById(
+    "collage-container"
+);
+
+
+const error = document.getElementById(
+    "error"
+);
+
+
+
+image.onload = function(){
+
+
+    loading.style.display = "none";
+
+
+    container.style.display = "block";
+
+
+};
+
+
+
+image.onerror = function(){
+
+
+    loading.style.display = "none";
+
+
+    error.style.display = "block";
+
+
+};
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

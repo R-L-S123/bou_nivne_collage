@@ -1,0 +1,6 @@
+Flask
+requests
+Pillow
+google-auth
+google-auth-oauthlib
+gunicorn
