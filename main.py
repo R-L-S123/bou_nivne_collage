@@ -53,15 +53,16 @@ def create_picker_session(creds):
 
     response = requests.post(
         "https://photospicker.googleapis.com/v1/sessions",
-
         headers={
             "Authorization": f"Bearer {creds.token}",
             "Content-Type": "application/json"
         },
-
-        json={"redirectUri": "https://bou-nivne-collage.onrender.com/picker/complete"}
+        json={}
     )
-
+    
+    print(response.status_code)
+    print(response.text)
+    
     response.raise_for_status()
 
     return response.json()
