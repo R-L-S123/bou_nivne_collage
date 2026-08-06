@@ -29,12 +29,11 @@ def create_auth_flow():
 
 
 
-def finish_authentication():
+def finish_authentication(code_verifier):
 
     credentials_data = json.loads(
         os.environ["GOOGLE_CREDENTIALS"]
     )
-
 
     flow = InstalledAppFlow.from_client_config(
         credentials_data,
@@ -42,13 +41,14 @@ def finish_authentication():
         redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
     )
 
+    flow.code_verifier = code_verifier
 
     flow.fetch_token(
         authorization_response=request.url
     )
 
-
     return flow.credentials
+
 def create_picker_session(creds):
 
     response = requests.post(
