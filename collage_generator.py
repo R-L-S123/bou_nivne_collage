@@ -121,13 +121,10 @@ def crop_to_fill(image, width, height):
 
 def apply_transform(image, x, y, scale):
 
-    new_width = int(
-        image.width * scale
-    )
+    # הגדלה סביב המרכז
 
-    new_height = int(
-        image.height * scale
-    )
+    new_width = int(image.width * scale)
+    new_height = int(image.height * scale)
 
 
     image = image.resize(
@@ -149,15 +146,24 @@ def apply_transform(image, x, y, scale):
     )
 
 
-    # אותו מרכז כמו בדפדפן
+    # CSS מזיז מהמרכז, לא מהפינה
+
     pos_x = (
-        OUTPUT_SIZE - new_width
-    ) // 2 + int(x)
+        OUTPUT_SIZE // 2
+        -
+        new_width // 2
+        +
+        int(x)
+    )
 
 
     pos_y = (
-        OUTPUT_SIZE - new_height
-    ) // 2 + int(y)
+        OUTPUT_SIZE // 2
+        -
+        new_height // 2
+        +
+        int(y)
+    )
 
 
     canvas.paste(
@@ -170,7 +176,7 @@ def apply_transform(image, x, y, scale):
 
 
     return canvas
-
+    
 def create_collage(image_paths, transform=None):
     scale, x, y = parse_transform(transform)
     images = []
