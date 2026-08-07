@@ -29,6 +29,7 @@ def get_authorization_url():
 
     authorization_url, state = flow.authorization_url(
         access_type="offline",
+        prompt="consent",
         include_granted_scopes="true"
     )
 
@@ -45,6 +46,9 @@ def save_token(flow):
 
     with open(TOKEN_FILE, "w") as f:
         f.write(credentials.to_json())
+
+    print("Saved token:")
+    print(credentials.to_json())
 
 
 
