@@ -133,7 +133,6 @@ def picker_complete():
     )
     session["grid_path"] = grid_path
     
-    from collage_generator import save_heart_mask
     from collage_generator import save_heart_overlay
     overlay_path = save_heart_overlay()
     session["overlay_path"] = overlay_path
