@@ -306,3 +306,30 @@ def create_grid(image_paths):
 
 
     return path
+
+def save_heart_mask():
+
+    mask = create_heart_mask(
+        OUTPUT_SIZE
+    )
+
+    mask = mask.transpose(
+        Image.Transpose.FLIP_TOP_BOTTOM
+    )
+
+
+    os.makedirs(
+        "static/temp",
+        exist_ok=True
+    )
+
+
+    path = "static/temp/heart_mask.png"
+
+
+    mask.save(
+        path
+    )
+
+
+    return path
