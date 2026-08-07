@@ -307,27 +307,29 @@ def create_grid(image_paths):
 
     return path
 
-def save_heart_mask():
+def save_heart_overlay():
 
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
 
 
-    # יצירת PNG עם שקיפות
-    heart = Image.new(
+    overlay = Image.new(
         "RGBA",
         (
             OUTPUT_SIZE,
             OUTPUT_SIZE
         ),
-        (0, 0, 0, 0)
+        (
+            255,
+            255,
+            255,
+            255
+        )
     )
 
 
-    # אזור מחוץ ללב שקוף,
-    # אזור הלב לבן
-    heart_pixels = heart.load()
+    pixels = overlay.load()
     mask_pixels = mask.load()
 
 
@@ -335,13 +337,14 @@ def save_heart_mask():
 
         for x in range(OUTPUT_SIZE):
 
+            # בתוך הלב = שקוף
             if mask_pixels[x, y] == 255:
 
-                heart_pixels[x, y] = (
+                pixels[x, y] = (
                     255,
                     255,
                     255,
-                    255
+                    0
                 )
 
 
@@ -351,13 +354,12 @@ def save_heart_mask():
     )
 
 
-    path = "static/temp/heart_mask.png"
+    path = "static/temp/heart_overlay.png"
 
 
-    heart.save(
+    overlay.save(
         path
     )
 
 
     return path
-
