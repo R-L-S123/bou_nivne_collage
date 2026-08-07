@@ -2,8 +2,8 @@ from PIL import Image, ImageDraw
 import os
 import math
 
-
 OUTPUT_SIZE = 1200
+
 
 def create_heart_mask(size):
 
@@ -16,77 +16,62 @@ def create_heart_mask(size):
     draw = ImageDraw.Draw(mask)
 
 
-    points = []
+    # שתי האונות העליונות של הלב
+    draw.ellipse(
+        (
+            size * 0.12,
+            size * 0.10,
+            size * 0.55,
+            size * 0.55
+        ),
+        fill=255
+    )
 
-    for y in range(size):
-
-        for x in range(size):
-
-            nx = (
-                x - size / 2
-            ) / (size / 2)
-
-            ny = (
-                y - size / 2
-            ) / (size / 2)
-
-
-            heart = (
-                nx**2 +
-                ny**2 -
-                0.3
-            )**3 - (
-                nx**2 *
-                ny**3
-            )
+    draw.ellipse(
+        (
+            size * 0.45,
+            size * 0.10,
+            size * 0.88,
+            size * 0.55
+        ),
+        fill=255
+    )
 
 
-            if heart < 0:
-
-                points.append(
-                    (x, y)
-                )
-
-
+    # החלק התחתון של הלב
     draw.polygon(
-        points,
+        [
+            (size * 0.08, size * 0.38),
+            (size * 0.92, size * 0.38),
+            (size * 0.50, size * 0.95)
+        ],
         fill=255
     )
 
 
     return mask
 
+
+
 def crop_to_fill(image, width, height):
     """
     חיתוך תמונה בלי עיוות
     """
 
-    img_ratio = (
-        image.width /
-        image.height
-    )
+    img_ratio = image.width / image.height
 
-    target_ratio = (
-        width /
-        height
-    )
+    target_ratio = width / height
 
 
     if img_ratio > target_ratio:
 
         new_height = height
-
-        new_width = int(
-            height * img_ratio
-        )
+        new_width = int(height * img_ratio)
 
     else:
 
         new_width = width
-
-        new_height = int(
-            width / img_ratio
-        )
+        new_height = int(width / img_ratio)
 
 
     image = image.resize(
@@ -95,14 +80,8 @@ def crop_to_fill(image, width, height):
     )
 
 
-    left = (
-        new_width - width
-    ) // 2
-
-
-    top = (
-        new_height - height
-    ) // 2
+    left = (new_width - width) // 2
+    top = (new_height - height) // 2
 
 
     return image.crop(
@@ -113,8 +92,6 @@ def crop_to_fill(image, width, height):
             top + height
         )
     )
-
-
 
 
 
@@ -129,9 +106,7 @@ def create_collage(image_paths):
 
             img = Image.open(path)
 
-            img = img.convert(
-                "RGB"
-            )
+            img = img.convert("RGB")
 
             images.append(img)
 
@@ -174,13 +149,8 @@ def create_collage(image_paths):
 
 
 
-    cell_width = (
-        OUTPUT_SIZE // cols
-    )
-
-    cell_height = (
-        OUTPUT_SIZE // rows
-    )
+    cell_width = OUTPUT_SIZE // cols
+    cell_height = OUTPUT_SIZE // rows
 
 
 
@@ -197,13 +167,8 @@ def create_collage(image_paths):
         )
 
 
-        x = (
-            col * cell_width
-        )
-
-        y = (
-            row * cell_height
-        )
+        x = col * cell_width
+        y = row * cell_height
 
 
         canvas.paste(
@@ -219,9 +184,7 @@ def create_collage(image_paths):
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
-    mask = mask.transpose(
-        Image.Transpose.FLIP_TOP_BOTTOM
-    )
+
 
     result = Image.new(
         "RGB",
