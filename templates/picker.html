@@ -51,10 +51,68 @@ document
     "click",
     function(){
 
-        window.open(
-            pickerUri,
-            "_blank"
-        );
+        <script>
+
+            const pickerUri = "{{ picker_uri }}";
+            
+            document
+            .getElementById("openPicker")
+            .addEventListener(
+            "click",
+            function(){
+            
+                window.open(
+                    pickerUri,
+                    "_blank"
+                );
+            
+            
+                document.querySelector("p").innerHTML =
+                "מחכה לסיום בחירת התמונות... ❤️";
+            
+            
+                checkPicker();
+            
+            });
+            
+            
+            
+            function checkPicker(){
+            
+                fetch(
+                    "/picker/status"
+                )
+                .then(
+                    response => response.json()
+                )
+                .then(
+                    data => {
+            
+                        console.log(data);
+            
+            
+                        if(data.done){
+            
+                            window.location.href =
+                            "/picker/complete";
+            
+                        }
+            
+                        else {
+            
+                            setTimeout(
+                                checkPicker,
+                                3000
+                            );
+            
+                        }
+            
+                    }
+                );
+            
+            }
+            
+            </script>
 
     }
 );
