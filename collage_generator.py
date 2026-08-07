@@ -367,37 +367,24 @@ def save_heart_overlay():
 
 
     return path
-def apply_transform(
-    image,
-    x,
-    y,
-    scale
-):
+def apply_transform(image, x, y, scale):
 
-    original_width = image.width
-    original_height = image.height
+    w, h = image.size
 
 
-    # הגדלה
-    new_width = int(
-        original_width * scale
-    )
-
-    new_height = int(
-        original_height * scale
-    )
+    new_w = int(w * scale)
+    new_h = int(h * scale)
 
 
     image = image.resize(
         (
-            new_width,
-            new_height
+            new_w,
+            new_h
         ),
         Image.LANCZOS
     )
 
 
-    # יצירת קנבס
     canvas = Image.new(
         "RGB",
         (
@@ -408,22 +395,23 @@ def apply_transform(
     )
 
 
-    # חישוב הזזה מהמרכז
-    offset_x = (
-        OUTPUT_SIZE - new_width
+    # כמו CSS scale מהמרכז
+
+    base_x = (
+        OUTPUT_SIZE - new_w
     ) // 2
 
 
-    offset_y = (
-        OUTPUT_SIZE - new_height
+    base_y = (
+        OUTPUT_SIZE - new_h
     ) // 2
 
 
     canvas.paste(
         image,
         (
-            offset_x + int(x),
-            offset_y + int(y)
+            base_x + int(x),
+            base_y + int(y)
         )
     )
 
