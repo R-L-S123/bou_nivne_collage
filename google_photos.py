@@ -171,7 +171,7 @@ def download_media_items(credentials, media_items):
 
 
             image_url = (
-                base_url + "=w1200-h1200"
+                base_url + "=w500-h500"
             )
 
 
