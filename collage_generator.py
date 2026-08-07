@@ -411,8 +411,8 @@ def apply_transform(image, x, y, scale):
     canvas.paste(
         image,
         (
-            base_x + int(x),
-            base_y + int(y)
+            base_x - int(x),
+            base_y - int(y)
         )
     )
 
