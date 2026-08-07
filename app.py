@@ -127,7 +127,13 @@ def picker_complete():
         photos
     )
 
-
+    from collage_generator import create_grid
+    
+    grid_path = create_grid(
+        image_paths
+    )
+    
+    session["grid_path"] = grid_path
     from collage_generator import create_collage
     session["image_paths"] = image_paths
     
