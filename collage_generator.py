@@ -4,7 +4,6 @@ import math
 
 OUTPUT_SIZE = 1200
 
-
 def create_heart_mask(size):
 
     mask = Image.new(
@@ -15,43 +14,46 @@ def create_heart_mask(size):
 
     draw = ImageDraw.Draw(mask)
 
+    points = []
 
-    # שתי האונות העליונות של הלב
-    draw.ellipse(
-        (
-            size * 0.12,
-            size * 0.10,
-            size * 0.55,
-            size * 0.55
-        ),
-        fill=255
-    )
+    for y in range(size):
 
-    draw.ellipse(
-        (
-            size * 0.45,
-            size * 0.10,
-            size * 0.88,
-            size * 0.55
-        ),
-        fill=255
-    )
+        for x in range(size):
+
+            # הופך את מערכת הצירים כדי שהלב יהיה בכיוון הנכון
+            nx = (
+                x - size / 2
+            ) / (size / 2)
+
+            ny = (
+                size / 2 - y
+            ) / (size / 2)
 
 
-    # החלק התחתון של הלב
+            heart = (
+                nx**2 +
+                ny**2 -
+                0.3
+            )**3 - (
+                nx**2 *
+                ny**3
+            )
+
+
+            if heart <= 0:
+
+                points.append(
+                    (x, y)
+                )
+
+
     draw.polygon(
-        [
-            (size * 0.08, size * 0.38),
-            (size * 0.92, size * 0.38),
-            (size * 0.50, size * 0.95)
-        ],
+        points,
         fill=255
     )
 
 
     return mask
-
-
 
 def crop_to_fill(image, width, height):
     """
