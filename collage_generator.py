@@ -313,9 +313,36 @@ def save_heart_mask():
         OUTPUT_SIZE
     )
 
-    mask = mask.transpose(
-        Image.Transpose.FLIP_TOP_BOTTOM
+
+    # יצירת PNG עם שקיפות
+    heart = Image.new(
+        "RGBA",
+        (
+            OUTPUT_SIZE,
+            OUTPUT_SIZE
+        ),
+        (0, 0, 0, 0)
     )
+
+
+    # אזור מחוץ ללב שקוף,
+    # אזור הלב לבן
+    heart_pixels = heart.load()
+    mask_pixels = mask.load()
+
+
+    for y in range(OUTPUT_SIZE):
+
+        for x in range(OUTPUT_SIZE):
+
+            if mask_pixels[x, y] == 255:
+
+                heart_pixels[x, y] = (
+                    255,
+                    255,
+                    255,
+                    255
+                )
 
 
     os.makedirs(
@@ -327,9 +354,10 @@ def save_heart_mask():
     path = "static/temp/heart_mask.png"
 
 
-    mask.save(
+    heart.save(
         path
     )
 
 
     return path
+
