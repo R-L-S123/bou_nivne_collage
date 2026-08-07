@@ -312,7 +312,9 @@ def save_heart_overlay():
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
-
+    mask = mask.transpose(
+        Image.Transpose.FLIP_TOP_BOTTOM
+    )
 
     overlay = Image.new(
         "RGBA",
