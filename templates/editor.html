@@ -3,31 +3,47 @@
 
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>עריכת קולאז׳</title>
+    <title>עריכת קולאז׳</title>
 
-<link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
 
-<style>
+    <style>
 
-.editor {
-    position: relative;
-    width: 90vw;
-    max-width: 600px;
-    aspect-ratio: 1;
-    margin: auto;
-}
+        .editor {
+            position: relative;
+            width: 90vw;
+            max-width: 600px;
+            aspect-ratio: 1;
+            margin: 30px auto;
+            overflow: hidden;
+        }
 
-.layer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
 
-</style>
+        .layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            top: 0;
+            left: 0;
+        }
+
+
+        #grid {
+            cursor: grab;
+            touch-action: none;
+        }
+
+
+        #mask {
+            pointer-events: none;
+        }
+
+
+    </style>
 
 </head>
 
@@ -36,27 +52,177 @@
 
 
 <h1>
-עריכת הקולאז׳ ❤️
+    עריכת הקולאז׳ ❤️
 </h1>
+
+
+<p>
+    גרור את התמונות עד שהמיקום מתאים לך
+</p>
 
 
 <div class="editor">
 
-    <img 
+
+    <img
+    id="grid"
     class="layer"
     src="/{{ grid_path }}">
 
-    <img 
+
+    <img
+    id="mask"
     class="layer"
     src="/{{ mask_path }}">
+
 
 </div>
 
 
 
-<button class="button">
-צור קולאז׳
+<button 
+class="button"
+id="create">
+
+    צור קולאז׳
+
 </button>
+
+
+
+<script>
+
+
+const grid = document.getElementById("grid");
+
+
+let dragging = false;
+
+
+let startX = 0;
+let startY = 0;
+
+
+let currentX = 0;
+let currentY = 0;
+
+
+
+function startDrag(x, y){
+
+    dragging = true;
+
+    startX = x - currentX;
+    startY = y - currentY;
+
+}
+
+
+
+function moveDrag(x, y){
+
+    if(!dragging)
+        return;
+
+
+    currentX = x - startX;
+    currentY = y - startY;
+
+
+    grid.style.transform =
+    `translate(${currentX}px, ${currentY}px)`;
+
+}
+
+
+
+function stopDrag(){
+
+    dragging = false;
+
+}
+
+
+
+// מחשב
+
+grid.addEventListener(
+"mousedown",
+(e)=>{
+
+    startDrag(
+        e.clientX,
+        e.clientY
+    );
+
+});
+
+
+
+window.addEventListener(
+"mousemove",
+(e)=>{
+
+    moveDrag(
+        e.clientX,
+        e.clientY
+    );
+
+});
+
+
+
+window.addEventListener(
+"mouseup",
+stopDrag
+);
+
+
+
+// טלפון
+
+grid.addEventListener(
+"touchstart",
+(e)=>{
+
+    const touch = e.touches[0];
+
+
+    startDrag(
+        touch.clientX,
+        touch.clientY
+    );
+
+
+});
+
+
+
+window.addEventListener(
+"touchmove",
+(e)=>{
+
+    const touch = e.touches[0];
+
+
+    moveDrag(
+        touch.clientX,
+        touch.clientY
+    );
+
+
+});
+
+
+
+window.addEventListener(
+"touchend",
+stopDrag
+);
+
+
+
+</script>
 
 
 </body>
