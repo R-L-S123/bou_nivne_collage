@@ -129,14 +129,11 @@ def picker_complete():
 
 
     from collage_generator import create_collage
-
-
-    create_collage(
-        image_paths
+    session["image_paths"] = image_paths
+    
+    return redirect(
+        "/editor"
     )
-
-
-    return redirect("/gallery")
 
 @app.route("/gallery")
 def gallery():
@@ -182,6 +179,13 @@ def picker_status():
             False
         )
     }
+
+@app.route("/editor")
+def editor():
+
+    return render_template(
+        "editor.html"
+    )
 
 if __name__ == "__main__":
 
