@@ -206,9 +206,11 @@ def create_collage(image_paths):
         exist_ok=True
     )
 
-
+    result = result.convert("RGB")
     result.save(
-        "static/output/collage.png"
+        "static/output/collage.png",
+        format="PNG",
+        optimize=True
     )
 
 
