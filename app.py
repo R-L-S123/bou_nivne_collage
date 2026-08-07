@@ -314,9 +314,7 @@ def generate():
 
     result = create_collage(
         image_paths,
-        session.get("grid_x", 0),
-        session.get("grid_y", 0),
-        session.get("grid_scale", 1)
+        session.get("grid_transform")
     )
 
 
