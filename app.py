@@ -205,9 +205,13 @@ def create_collage_route():
 
     x = data["x"]
     y = data["y"]
+    scale = data["scale"]
+
 
     session["grid_x"] = x
     session["grid_y"] = y
+    session["grid_scale"] = scale
+
 
     return {
         "status": "ok"
