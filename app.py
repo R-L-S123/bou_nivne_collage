@@ -128,12 +128,15 @@ def picker_complete():
     )
 
     from collage_generator import create_grid
-    
     grid_path = create_grid(
         image_paths
     )
-    
     session["grid_path"] = grid_path
+    
+    from collage_generator import save_heart_mask
+    mask_path = save_heart_mask()
+    session["mask_path"] = mask_path
+    
     from collage_generator import create_collage
     session["image_paths"] = image_paths
     
@@ -190,8 +193,11 @@ def picker_status():
 def editor():
 
     return render_template(
-        "editor.html"
+        "editor.html",
+        grid_path=session.get("grid_path"),
+        mask_path=session.get("mask_path")
     )
+
 
 if __name__ == "__main__":
 
