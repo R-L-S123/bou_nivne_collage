@@ -278,8 +278,8 @@ def create_collage(image_paths, transform=None):
 
     canvas = apply_transform(
         canvas,
-        offset_x,
-        offset_y,
+        x,
+        y,
         scale
     )
 
