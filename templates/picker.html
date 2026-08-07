@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>בחירת תמונות</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <h1>
+        בחר את התמונות שלך 📸
+    </h1>
+
+
+    <p>
+        לאחר שתסיים לבחור תמונות לחץ על סיום
+    </p>
+
+
+    <button 
+        id="openPicker"
+        class="button">
+        פתיחת Google Photos
+    </button>
+
+
+</div>
+
+
+
+<script>
+
+const pickerUri = "{{ picker_uri }}";
+
+
+document
+.getElementById("openPicker")
+.addEventListener(
+    "click",
+    function(){
+
+        window.open(
+            pickerUri,
+            "_blank"
+        );
+
+    }
+);
+
+
+</script>
+
+
+
+</body>
+
+</html>
