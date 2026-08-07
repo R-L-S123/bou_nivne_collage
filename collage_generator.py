@@ -19,28 +19,29 @@ def create_heart_mask(size):
 
         for x in range(size):
 
-            # המרה לקואורדינטות בין -1 ל-1
+            # מרכז הקואורדינטות
             nx = (
                 2 * x - size
-            ) / (size * 1.33)
+            ) / (size * 0.85)
+
 
             ny = (
                 2 * y - size
-            ) / (size * 1.33)
+            ) / (size * 0.85)
 
 
-            # נוסחת לב קלאסית
+            # תיקון יחס גובה
+            ny *= 1.15
+
+
             heart = (
-                nx**2 + ny**2 - 0.3
-            )**3 - (
-                nx**2 * ny**3
-            )
+                nx**2 + ny**2 - 1
+            )**3 - nx**2 * ny**3
 
 
-            # היפוך ציר Y
             if heart <= 0:
 
-                pixels[x, y] = 255
+                pixels[x,y] = 255
 
 
     return mask
