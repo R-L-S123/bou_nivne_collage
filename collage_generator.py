@@ -1,8 +1,10 @@
-from PIL import Image, ImageDraw
+from PIL import Image
 import os
 import math
 
+
 OUTPUT_SIZE = 1200
+
 
 def create_heart_mask(size):
 
@@ -19,7 +21,6 @@ def create_heart_mask(size):
 
         for x in range(size):
 
-            # מרכז הקואורדינטות
             nx = (
                 2 * x - size
             ) / (size * 0.85)
@@ -30,7 +31,6 @@ def create_heart_mask(size):
             ) / (size * 0.85)
 
 
-            # תיקון יחס גובה
             ny *= 1.15
 
 
@@ -40,11 +40,12 @@ def create_heart_mask(size):
 
 
             if heart <= 0:
-
-                pixels[x,y] = 255
+                pixels[x, y] = 255
 
 
     return mask
+
+
 
 def crop_to_fill(image, width, height):
     """
@@ -52,7 +53,6 @@ def crop_to_fill(image, width, height):
     """
 
     img_ratio = image.width / image.height
-
     target_ratio = width / height
 
 
@@ -67,14 +67,24 @@ def crop_to_fill(image, width, height):
         new_height = int(width / img_ratio)
 
 
+
     image = image.resize(
-        (new_width, new_height),
+        (
+            new_width,
+            new_height
+        ),
         Image.LANCZOS
     )
 
 
-    left = (new_width - width) // 2
-    top = (new_height - height) // 2
+    left = (
+        new_width - width
+    ) // 2
+
+
+    top = (
+        new_height - height
+    ) // 2
 
 
     return image.crop(
@@ -87,8 +97,72 @@ def crop_to_fill(image, width, height):
     )
 
 
-def create_collage(image_paths,x=0,y=0,scale=1):
+
+def apply_transform(image, x, y, scale):
+
+    new_width = int(
+        image.width * scale
+    )
+
+    new_height = int(
+        image.height * scale
+    )
+
+
+    image = image.resize(
+        (
+            new_width,
+            new_height
+        ),
+        Image.LANCZOS
+    )
+
+
+    canvas = Image.new(
+        "RGB",
+        (
+            OUTPUT_SIZE,
+            OUTPUT_SIZE
+        ),
+        "white"
+    )
+
+
+    # אותו עיקרון כמו CSS:
+    # הגדלה מהמרכז
+
+    pos_x = (
+        OUTPUT_SIZE - new_width
+    ) // 2 + int(x)
+
+
+    pos_y = (
+        OUTPUT_SIZE - new_height
+    ) // 2 + int(y)
+
+
+    canvas.paste(
+        image,
+        (
+            pos_x,
+            pos_y
+        )
+    )
+
+
+    return canvas
+
+
+
+def create_collage(
+    image_paths,
+    offset_x=0,
+    offset_y=0,
+    scale=1
+):
+
     images = []
+
 
     for path in image_paths:
 
@@ -96,7 +170,9 @@ def create_collage(image_paths,x=0,y=0,scale=1):
 
             img = Image.open(path)
 
-            img = img.convert("RGB")
+            img = img.convert(
+                "RGB"
+            )
 
             images.append(img)
 
@@ -133,14 +209,21 @@ def create_collage(image_paths,x=0,y=0,scale=1):
         math.sqrt(count)
     )
 
+
     rows = math.ceil(
         count / cols
     )
 
 
 
-    cell_width = OUTPUT_SIZE // cols
-    cell_height = OUTPUT_SIZE // rows
+    cell_width = (
+        OUTPUT_SIZE // cols
+    )
+
+
+    cell_height = (
+        OUTPUT_SIZE // rows
+    )
 
 
 
@@ -150,6 +233,7 @@ def create_collage(image_paths,x=0,y=0,scale=1):
         col = index % cols
 
 
+
         img = crop_to_fill(
             img,
             cell_width,
@@ -157,31 +241,49 @@ def create_collage(image_paths,x=0,y=0,scale=1):
         )
 
 
-        x = col * cell_width
-        y = row * cell_height
+
+        cell_x = (
+            col * cell_width
+        )
+
+
+        cell_y = (
+            row * cell_height
+        )
+
 
 
         canvas.paste(
             img,
             (
-                x,
-                y
+                cell_x,
+                cell_y
             )
         )
 
 
+
+    # כאן נכנס המיקום והזום של המשתמש
+
     canvas = apply_transform(
         canvas,
-        x,
-        y,
+        offset_x,
+        offset_y,
         scale
     )
+
+
+
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
+
+
     mask = mask.transpose(
         Image.Transpose.FLIP_TOP_BOTTOM
     )
+
+
 
     result = Image.new(
         "RGB",
@@ -191,6 +293,7 @@ def create_collage(image_paths,x=0,y=0,scale=1):
         ),
         "white"
     )
+
 
 
     result.paste(
@@ -209,17 +312,22 @@ def create_collage(image_paths,x=0,y=0,scale=1):
         exist_ok=True
     )
 
-    result = result.convert("RGB")
+
+
+    path = (
+        "static/output/collage.png"
+    )
+
+
     result.save(
-        "static/output/collage.png",
+        path,
         format="PNG",
         optimize=True
     )
 
 
-    return (
-        "static/output/collage.png"
-    )
+    return path
+
 
 
 def create_grid(image_paths):
@@ -233,33 +341,50 @@ def create_grid(image_paths):
 
             img = Image.open(path)
 
-            img = img.convert("RGB")
+            img = img.convert(
+                "RGB"
+            )
 
             images.append(img)
+
 
         except Exception:
 
             continue
 
 
+
     if len(images) == 0:
-        raise Exception("No images found")
+
+        raise Exception(
+            "No images found"
+        )
 
 
-    size = 1200
+
+    size = OUTPUT_SIZE
 
 
     cols = math.ceil(
         math.sqrt(len(images))
     )
 
+
     rows = math.ceil(
         len(images) / cols
     )
 
 
-    cell_width = size // cols
-    cell_height = size // rows
+
+    cell_width = (
+        size // cols
+    )
+
+
+    cell_height = (
+        size // rows
+    )
+
 
 
     canvas = Image.new(
@@ -272,10 +397,12 @@ def create_grid(image_paths):
     )
 
 
+
     for index, img in enumerate(images):
 
         row = index // cols
         col = index % cols
+
 
 
         img = crop_to_fill(
@@ -283,6 +410,7 @@ def create_grid(image_paths):
             cell_width,
             cell_height
         )
+
 
 
         canvas.paste(
@@ -294,13 +422,17 @@ def create_grid(image_paths):
         )
 
 
+
     os.makedirs(
         "static/temp",
         exist_ok=True
     )
 
 
-    path = "static/temp/grid.png"
+
+    path = (
+        "static/temp/grid.png"
+    )
 
 
     canvas.save(
@@ -310,14 +442,20 @@ def create_grid(image_paths):
 
     return path
 
+
+
 def save_heart_overlay():
 
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
+
+
     mask = mask.transpose(
         Image.Transpose.FLIP_TOP_BOTTOM
     )
+
+
 
     overlay = Image.new(
         "RGBA",
@@ -334,15 +472,16 @@ def save_heart_overlay():
     )
 
 
+
     pixels = overlay.load()
     mask_pixels = mask.load()
+
 
 
     for y in range(OUTPUT_SIZE):
 
         for x in range(OUTPUT_SIZE):
 
-            # בתוך הלב = שקוף
             if mask_pixels[x, y] == 255:
 
                 pixels[x, y] = (
@@ -353,13 +492,17 @@ def save_heart_overlay():
                 )
 
 
+
     os.makedirs(
         "static/temp",
         exist_ok=True
     )
 
 
-    path = "static/temp/heart_overlay.png"
+
+    path = (
+        "static/temp/heart_overlay.png"
+    )
 
 
     overlay.save(
@@ -368,71 +511,3 @@ def save_heart_overlay():
 
 
     return path
-
-def apply_transform(image, x, y, scale):
-
-    # הגדלת הגריד
-    new_width = int(image.width * scale)
-    new_height = int(image.height * scale)
-
-
-    image = image.resize(
-        (
-            new_width,
-            new_height
-        ),
-        Image.LANCZOS
-    )
-
-
-    # שכבה זמנית גדולה מספיק
-    temp = Image.new(
-        "RGB",
-        (
-            new_width,
-            new_height
-        ),
-        "white"
-    )
-
-    temp.paste(
-        image,
-        (
-            0,
-            0
-        )
-    )
-
-
-    # קנבס כמו העורך
-    canvas = Image.new(
-        "RGB",
-        (
-            OUTPUT_SIZE,
-            OUTPUT_SIZE
-        ),
-        "white"
-    )
-
-
-    # מיקום מהמרכז
-    pos_x = (
-        OUTPUT_SIZE - new_width
-    ) // 2 + int(x)
-
-
-    pos_y = (
-        OUTPUT_SIZE - new_height
-    ) // 2 + int(y)
-
-
-    canvas.paste(
-        temp,
-        (
-            pos_x,
-            pos_y
-        )
-    )
-
-
-    return canvas
