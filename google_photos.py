@@ -24,7 +24,7 @@ def get_authorization_url():
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE,
         scopes=SCOPES,
-        redirect_uri="http://localhost:5000/oauth/callback"
+        redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
     )
 
     authorization_url, state = flow.authorization_url(
