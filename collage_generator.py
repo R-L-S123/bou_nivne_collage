@@ -5,6 +5,29 @@ import math
 
 OUTPUT_SIZE = 1200
 
+def parse_transform(transform):
+
+    if not transform or "matrix" not in transform:
+        return 1, 0, 0
+
+
+    values = transform.replace(
+        "matrix(",
+        ""
+    ).replace(
+        ")",
+        ""
+    ).split(",")
+
+
+    scale = float(values[0])
+
+    x = float(values[4])
+
+    y = float(values[5])
+
+
+    return scale, x, y
 
 def create_heart_mask(size):
 
@@ -96,8 +119,6 @@ def crop_to_fill(image, width, height):
         )
     )
 
-
-
 def apply_transform(image, x, y, scale):
 
     new_width = int(
@@ -128,17 +149,15 @@ def apply_transform(image, x, y, scale):
     )
 
 
-    # אותו עיקרון כמו CSS:
-    # הגדלה מהמרכז
-
+    # אותו מרכז כמו בדפדפן
     pos_x = (
         OUTPUT_SIZE - new_width
-    ) // 2 + int(x) + 15
-    
-    
+    ) // 2 + int(x)
+
+
     pos_y = (
         OUTPUT_SIZE - new_height
-    ) // 2 + int(y) + 15
+    ) // 2 + int(y)
 
 
     canvas.paste(
@@ -152,17 +171,9 @@ def apply_transform(image, x, y, scale):
 
     return canvas
 
-
-
-def create_collage(
-    image_paths,
-    offset_x=0,
-    offset_y=0,
-    scale=1
-):
-
+def create_collage(image_paths, transform=None):
+    scale, x, y = parse_transform(transform)
     images = []
-
 
     for path in image_paths:
 
