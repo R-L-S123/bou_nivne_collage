@@ -22,9 +22,9 @@ def parse_transform(transform):
 
     scale = float(values[0])
 
-    x = float(values[4])
+    x = -float(values[4])
 
-    y = float(values[5])
+    y = -float(values[5])
 
 
     return scale, x, y
