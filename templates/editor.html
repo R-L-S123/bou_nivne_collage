@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
 
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>עריכת קולאז׳</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+
+.editor {
+    position: relative;
+    width: 90vw;
+    max-width: 600px;
+    aspect-ratio: 1;
+    margin: auto;
+}
+
+.layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>
+עריכת הקולאז׳ ❤️
+</h1>
+
+
+<div class="editor">
+
+    <img 
+    class="layer"
+    src="/{{ grid_path }}">
+
+    <img 
+    class="layer"
+    src="/{{ mask_path }}">
+
+</div>
+
+
+
+<button class="button">
+צור קולאז׳
+</button>
+
+
+</body>
+
+</html>
