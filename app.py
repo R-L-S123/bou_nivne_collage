@@ -49,7 +49,7 @@ def oauth_callback():
         CLIENT_SECRET_FILE,
         scopes=SCOPES,
         state=session["state"],
-        redirect_uri="http://localhost:5000/oauth/callback"
+        redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
     )
 
 
