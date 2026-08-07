@@ -198,6 +198,20 @@ def editor():
         mask_path=session.get("mask_path")
     )
 
+@app.route("/create_collage", methods=["POST"])
+def create_collage_route():
+
+    data = request.get_json()
+
+    x = data["x"]
+    y = data["y"]
+
+    session["grid_x"] = x
+    session["grid_y"] = y
+
+    return {
+        "status": "ok"
+    }
 
 if __name__ == "__main__":
 
