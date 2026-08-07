@@ -122,24 +122,36 @@ def picker_complete():
     )
 
 
+
     image_paths = download_media_items(
         credentials,
         photos
     )
 
+
+    # שמירת התמונות לפני מעבר לעורך
+    session["image_paths"] = image_paths
+
+
+
     from collage_generator import create_grid
+
     grid_path = create_grid(
         image_paths
     )
+
     session["grid_path"] = grid_path
-    
+
+
+
     from collage_generator import save_heart_overlay
+
     overlay_path = save_heart_overlay()
+
     session["overlay_path"] = overlay_path
-    
-    from collage_generator import create_collage
-    session["image_paths"] = image_paths
-    
+
+
+
     return redirect(
         "/editor"
     )
