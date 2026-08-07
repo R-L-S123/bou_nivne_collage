@@ -22,11 +22,11 @@ def create_heart_mask(size):
             # המרה לקואורדינטות בין -1 ל-1
             nx = (
                 2 * x - size
-            ) / size
+            ) / (size * 0.75)
 
             ny = (
                 2 * y - size
-            ) / size
+            ) / (size * 0.75)
 
 
             # נוסחת לב קלאסית
