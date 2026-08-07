@@ -219,7 +219,9 @@ def create_collage(image_paths):
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
-
+    mask = mask.transpose(
+        Image.Transpose.FLIP_TOP_BOTTOM
+    )
 
     result = Image.new(
         "RGB",
