@@ -65,8 +65,6 @@ def load_credentials():
         SCOPES
     )
 
-
-
 def create_picker_session(credentials):
     """
     יוצר Session חדש של Google Photos Picker
@@ -80,10 +78,8 @@ def create_picker_session(credentials):
     }
 
     body = {
-        "pickerConfig": {
-            "mediaTypeFilter": {
-                "mediaTypes": ["PHOTO"]
-            }
+        "pickingConfig": {
+            "maxItemCount": 100
         }
     }
 
@@ -93,11 +89,13 @@ def create_picker_session(credentials):
         json=body
     )
 
+    if not response.ok:
+        print("Google error:")
+        print(response.text)
+
     response.raise_for_status()
 
     return response.json()
-
-
 
 def get_selected_media_items(credentials, session_id):
     """
