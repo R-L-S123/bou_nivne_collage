@@ -24,7 +24,7 @@
     </h1>
 
 
-    <p>
+    <p id="status">
         לאחר שתסיים לבחור תמונות לחץ על סיום
     </p>
 
@@ -32,7 +32,9 @@
     <button 
         id="openPicker"
         class="button">
+
         פתיחת Google Photos
+
     </button>
 
 
@@ -45,81 +47,97 @@
 const pickerUri = "{{ picker_uri }}";
 
 
+
 document
 .getElementById("openPicker")
 .addEventListener(
-    "click",
-    function(){
+"click",
+function(){
 
-        <script>
 
-            const pickerUri = "{{ picker_uri }}";
-            
-            document
-            .getElementById("openPicker")
-            .addEventListener(
-            "click",
-            function(){
-            
-                window.open(
-                    pickerUri,
-                    "_blank"
-                );
-            
-            
-                document.querySelector("p").innerHTML =
-                "מחכה לסיום בחירת התמונות... ❤️";
-            
-            
-                checkPicker();
-            
-            });
-            
-            
-            
-            function checkPicker(){
-            
-                fetch(
-                    "/picker/status"
-                )
-                .then(
-                    response => response.json()
-                )
-                .then(
-                    data => {
-            
-                        console.log(data);
-            
-            
-                        if(data.done){
-            
-                            window.location.href =
-                            "/picker/complete";
-            
-                        }
-            
-                        else {
-            
-                            setTimeout(
-                                checkPicker,
-                                3000
-                            );
-            
-                        }
-            
-                    }
-                );
-            
+    window.open(
+        pickerUri,
+        "_blank"
+    );
+
+
+    document
+    .getElementById("status")
+    .innerHTML =
+    "מחכה לסיום בחירת התמונות... ❤️";
+
+
+    checkPicker();
+
+
+});
+
+
+
+function checkPicker(){
+
+
+    fetch("/picker/status")
+
+    .then(
+        response => response.json()
+    )
+
+    .then(
+        data => {
+
+
+            console.log(data);
+
+
+            if(data.done){
+
+
+                document
+                .getElementById("status")
+                .innerHTML =
+                "התמונות התקבלו בהצלחה! יוצר קולאז׳... ❤️";
+
+
+                window.location.href =
+                "/picker/complete";
+
+
             }
-            
-            </script>
 
-    }
-);
+            else {
+
+
+                setTimeout(
+                    checkPicker,
+                    3000
+                );
+
+
+            }
+
+
+        }
+    )
+
+    .catch(
+        error => {
+
+            console.log(error);
+
+            setTimeout(
+                checkPicker,
+                5000
+            );
+
+        }
+    );
+
+
+}
 
 
 </script>
-
 
 
 </body>
