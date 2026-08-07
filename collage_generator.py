@@ -5,12 +5,7 @@ import math
 
 OUTPUT_SIZE = 1200
 
-
-
 def create_heart_mask(size):
-    """
-    יוצר מסכת לב לקולאז׳
-    """
 
     mask = Image.new(
         "L",
@@ -37,27 +32,29 @@ def create_heart_mask(size):
 
 
             heart = (
-                nx**2 + ny**2 - 0.3
-            )**3 - nx**2 * ny**3
+                nx**2 +
+                ny**2 -
+                0.3
+            )**3 - (
+                nx**2 *
+                ny**3
+            )
 
 
-            if heart <= 0:
+            if heart < 0:
+
                 points.append(
                     (x, y)
                 )
 
 
-    for p in points:
-        mask.putpixel(
-            p,
-            255
-        )
+    draw.polygon(
+        points,
+        fill=255
+    )
 
 
     return mask
-
-
-
 
 def crop_to_fill(image, width, height):
     """
@@ -159,7 +156,7 @@ def create_collage(image_paths):
             OUTPUT_SIZE,
             OUTPUT_SIZE
         ),
-        "black"
+        "white"
     )
 
 
@@ -230,7 +227,7 @@ def create_collage(image_paths):
             OUTPUT_SIZE,
             OUTPUT_SIZE
         ),
-        "black"
+        "white"
     )
 
 
