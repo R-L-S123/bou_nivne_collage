@@ -42,26 +42,25 @@
 }
 
 
-/* התמונות */
+
 #grid {
 
     z-index: 1;
-
     touch-action: none;
 
 }
 
 
 
-/* הלב */
 #overlay {
-    z-index:2;
-    pointer-events:none;
+
+    z-index: 2;
+    pointer-events: none;
+
 }
 
 
 
-/* שכבת שליטה על הגרירה */
 #drag-area {
 
     position: absolute;
@@ -90,7 +89,6 @@
 
 </style>
 
-
 </head>
 
 
@@ -103,7 +101,7 @@
 
 
 <p>
-גרור את התמונות מתחת ללב
+הזז והגדל את התמונות בתוך הלב
 </p>
 
 
@@ -159,8 +157,28 @@ let currentX = 0;
 let currentY = 0;
 
 
+let currentScale = 1;
 
-function startDrag(x, y) {
+
+
+function updateTransform(){
+
+    grid.style.transform =
+    `
+    translate(${currentX}px, ${currentY}px)
+    scale(${currentScale})
+    `;
+
+}
+
+
+
+// ----------------
+// גרירה
+// ----------------
+
+
+function startDrag(x,y){
 
     dragging = true;
 
@@ -171,9 +189,9 @@ function startDrag(x, y) {
 
 
 
-function moveDrag(x, y) {
+function moveDrag(x,y){
 
-    if (!dragging)
+    if(!dragging)
         return;
 
 
@@ -181,14 +199,13 @@ function moveDrag(x, y) {
     currentY = y - startY;
 
 
-    grid.style.transform =
-        `translate(${currentX}px, ${currentY}px)`;
+    updateTransform();
 
 }
 
 
 
-function stopDrag() {
+function stopDrag(){
 
     dragging = false;
 
@@ -232,19 +249,86 @@ stopDrag
 
 
 
-// טלפון
+// ----------------
+// זום מחשב - גלגלת
+// ----------------
+
+
+document
+.querySelector(".editor")
+.addEventListener(
+"wheel",
+(e)=>{
+
+
+    e.preventDefault();
+
+
+    if(e.deltaY < 0){
+
+        currentScale += 0.05;
+
+    }
+    else{
+
+        currentScale -= 0.05;
+
+    }
+
+
+    if(currentScale < 0.5)
+        currentScale = 0.5;
+
+
+    if(currentScale > 3)
+        currentScale = 3;
+
+
+
+    updateTransform();
+
+
+},
+{
+    passive:false
+});
+
+
+
+
+// ----------------
+// טלפון - גרירה + pinch zoom
+// ----------------
+
+
+let lastDistance = null;
+
 
 dragArea.addEventListener(
 "touchstart",
 (e)=>{
 
-    const touch = e.touches[0];
+
+    if(e.touches.length === 1){
+
+        startDrag(
+            e.touches[0].clientX,
+            e.touches[0].clientY
+        );
+
+    }
 
 
-    startDrag(
-        touch.clientX,
-        touch.clientY
-    );
+    if(e.touches.length === 2){
+
+        lastDistance =
+        getDistance(
+            e.touches[0],
+            e.touches[1]
+        );
+
+    }
+
 
 });
 
@@ -254,27 +338,109 @@ window.addEventListener(
 "touchmove",
 (e)=>{
 
-    const touch = e.touches[0];
+
+    e.preventDefault();
 
 
-    moveDrag(
-        touch.clientX,
-        touch.clientY
-    );
 
+    if(e.touches.length === 1 && dragging){
+
+        moveDrag(
+            e.touches[0].clientX,
+            e.touches[0].clientY
+        );
+
+    }
+
+
+
+    if(e.touches.length === 2){
+
+
+        let distance =
+        getDistance(
+            e.touches[0],
+            e.touches[1]
+        );
+
+
+
+        if(lastDistance){
+
+
+            let diff =
+            distance - lastDistance;
+
+
+
+            currentScale += diff * 0.005;
+
+
+
+            if(currentScale < 0.5)
+                currentScale = 0.5;
+
+
+            if(currentScale > 3)
+                currentScale = 3;
+
+
+
+            updateTransform();
+
+
+        }
+
+
+
+        lastDistance = distance;
+
+
+    }
+
+
+},
+{
+    passive:false
 });
 
 
 
 window.addEventListener(
 "touchend",
-stopDrag
-);
+()=>{
+
+    dragging = false;
+    lastDistance = null;
+
+});
 
 
 
 
-// שמירת מיקום
+
+function getDistance(a,b){
+
+    return Math.sqrt(
+        Math.pow(
+            a.clientX - b.clientX,
+            2
+        )
+        +
+        Math.pow(
+            a.clientY - b.clientY,
+            2
+        )
+    );
+
+}
+
+
+
+// ----------------
+// שמירה
+// ----------------
+
 
 document
 .getElementById("create")
@@ -297,7 +463,8 @@ async ()=>{
             body:JSON.stringify(
                 {
                     x: currentX,
-                    y: currentY
+                    y: currentY,
+                    scale: currentScale
                 }
             )
 
@@ -306,6 +473,7 @@ async ()=>{
 
 
     alert("המיקום נשמר");
+
 
 });
 
