@@ -196,7 +196,7 @@ def editor():
     return render_template(
         "editor.html",
         grid_path=session.get("grid_path"),
-        mask_path=session.get("mask_path")
+        overlay_path=session.get("overlay_path")
     )
 
 @app.route("/create_collage", methods=["POST"])
