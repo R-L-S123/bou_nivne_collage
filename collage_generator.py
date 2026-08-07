@@ -133,12 +133,12 @@ def apply_transform(image, x, y, scale):
 
     pos_x = (
         OUTPUT_SIZE - new_width
-    ) // 2 + int(x)
-
-
+    ) // 2 + int(x) + 15
+    
+    
     pos_y = (
         OUTPUT_SIZE - new_height
-    ) // 2 + int(y)
+    ) // 2 + int(y) + 15
 
 
     canvas.paste(
