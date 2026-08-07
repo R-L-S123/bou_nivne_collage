@@ -86,11 +86,8 @@ def crop_to_fill(image, width, height):
     )
 
 
-
-def create_collage(image_paths):
-
+def create_collage(image_paths,x=0,y=0,scale=1):
     images = []
-
 
     for path in image_paths:
 
@@ -172,7 +169,12 @@ def create_collage(image_paths):
         )
 
 
-
+    canvas = apply_transform(
+        canvas,
+        x,
+        y,
+        scale
+    )
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
