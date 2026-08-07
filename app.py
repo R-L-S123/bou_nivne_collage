@@ -235,7 +235,39 @@ def editor():
 
 
 
-# חדש - מקבל את ה-transform האמיתי מהדפדפן
+# שמירת מיקום וזום מהעורך הישן
+
+@app.route("/create_collage", methods=["POST"])
+def create_collage_route():
+
+    data = request.get_json()
+
+
+    session["grid_x"] = data.get(
+        "x",
+        0
+    )
+
+    session["grid_y"] = data.get(
+        "y",
+        0
+    )
+
+    session["grid_scale"] = data.get(
+        "scale",
+        1
+    )
+
+
+    return jsonify(
+        {
+            "status": "ok"
+        }
+    )
+
+
+
+# שמירת ה-transform החדש של CSS
 
 @app.route("/save_transform", methods=["POST"])
 def save_transform():
@@ -257,9 +289,7 @@ def save_transform():
 
     return jsonify(
         {
-            "status": "ok",
-            "transform":
-            session["grid_transform"]
+            "status": "ok"
         }
     )
 
@@ -276,11 +306,17 @@ def generate():
     )
 
 
+    if not image_paths:
+
+        return "No images"
+
+
+
     result = create_collage(
         image_paths,
-        0,
-        0,
-        1
+        session.get("grid_x", 0),
+        session.get("grid_y", 0),
+        session.get("grid_scale", 1)
     )
 
 
