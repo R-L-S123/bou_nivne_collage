@@ -9,6 +9,7 @@
 <title>עריכת קולאז׳</title>
 
 <link rel="stylesheet" href="/static/style.css">
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 
 <style>
@@ -407,8 +408,6 @@ dragArea.addEventListener(
 // ======================
 // יצירת קולאז׳
 // ======================
-
-
 document
 .getElementById("create")
 .addEventListener(
@@ -416,59 +415,43 @@ document
 async ()=>{
 
 
-    await fetch(
-        "/create_collage",
+    const editor =
+    document.querySelector(".editor");
+
+
+    const canvas =
+    await html2canvas(
+        editor,
         {
-
-            method:"POST",
-
-            headers:{
-
-                "Content-Type":
-                "application/json"
-
-            },
-
-
-            body:JSON.stringify({
-
-                x:x,
-
-                y:y,
-
-                scale:scale
-
-            })
-
+            backgroundColor: "white",
+            scale: 2
         }
     );
 
 
-
-    const transform =
-    getComputedStyle(grid).transform;
+    const image =
+    canvas.toDataURL(
+        "image/png"
+    );
 
 
 
     await fetch(
-        "/save_transform",
+        "/save_image",
         {
 
             method:"POST",
 
             headers:{
-
                 "Content-Type":
                 "application/json"
-
             },
 
-
-            body:JSON.stringify({
-
-                transform:transform
-
-            })
+            body:JSON.stringify(
+                {
+                    image:image
+                }
+            )
 
         }
     );
@@ -476,11 +459,10 @@ async ()=>{
 
 
     window.location.href =
-    "/generate";
+    "/gallery";
 
 
 });
-
 
 </script>
 
