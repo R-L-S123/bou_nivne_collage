@@ -1,110 +1,42 @@
-from flask import Flask, render_template, redirect, session, request
-import json
-from flask import send_file
-import io
-import requests
-import time
+from flask import Flask, render_template, redirect, request, session, url_for
+import os
 
-from collage import create_collage
-from main import create_auth_flow, import_photos, finish_authentication
+from google_auth_oauthlib.flow import Flow
+
+from google_photos import (
+    get_authorization_url,
+    save_token,
+    load_credentials,
+    create_picker_session,
+    get_selected_media_items,
+    save_photos_json,
+    CLIENT_SECRET_FILE,
+    SCOPES
+)
 
 
 app = Flask(__name__)
+
 app.secret_key = "change-this-secret-key"
 
-@app.route("/finish_import")
-def finish_import():
 
-   if not wait_for_selection(creds, session_id):
-    return {"done": False}
-
-    data = get_selected_photos(creds, session_id)
-    
-    photos = save_photos_to_json(data, creds)
-    
-    create_collage()
-    
-    return {"done": True}
-
-
-@app.route("/photo/<int:index>")
-def get_photo(index):
-
-    with open(
-        "photos.json",
-        encoding="utf-8"
-    ) as f:
-        photos = json.load(f)
-
-
-    photo = photos[index]
-
-
-    response = requests.get(
-        photo["url"] + "=w1000-h1000",
-        headers={
-            "Authorization":
-            f"Bearer {photo['token']}"
-        }
-    )
-
-
-    return send_file(
-        io.BytesIO(response.content),
-        mimetype="image/jpeg"
-    )
+# בשביל פיתוח מקומי בלבד
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
 
 @app.route("/")
-def home():
-
-    try:
-
-        with open(
-            "photos.json",
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            photos = json.load(f)
-
-
-    except:
-
-        photos = []
-
-
-    for photo in photos:
-
-        photo["display_url"] = (
-            photo["url"] +
-            "=w500-h500"
-        )
-
-
-    return render_template(
-        "gallery.html",
-        photos=photos,
-        collage_version=time.time()
-    )
+def index():
+    return render_template("index.html")
 
 
 
-@app.route("/import")
-def import_google_photos():
+@app.route("/login")
+def login():
 
-    flow = create_auth_flow()
+    authorization_url, state = get_authorization_url()
 
-
-    authorization_url, state = flow.authorization_url(
-        access_type="offline",
-        include_granted_scopes="true"
-    )
-
-
-    session["code_verifier"] = flow.code_verifier
-
+    session["state"] = state
 
     return redirect(authorization_url)
 
@@ -113,75 +45,92 @@ def import_google_photos():
 @app.route("/oauth/callback")
 def oauth_callback():
 
-
-    creds = finish_authentication(
-        session["code_verifier"],
-        request.url
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRET_FILE,
+        scopes=SCOPES,
+        state=session["state"],
+        redirect_uri="http://localhost:5000/oauth/callback"
     )
 
-    picker_session = import_photos(
-        creds
+
+    flow.fetch_token(
+        authorization_response=request.url
     )
-    
-    
-    session["picker_id"] = picker_session["id"]
-    session["access_token"] = creds.token
-    
-    
-    return redirect(
-        picker_session["pickerUri"]
+
+
+    save_token(flow)
+
+
+    return redirect("/picker")
+
+
+
+@app.route("/picker")
+def picker():
+
+    credentials = load_credentials()
+
+    if credentials is None:
+        return redirect("/login")
+
+
+    session_data = create_picker_session(
+        credentials
     )
+
+
+    session["picker_session_id"] = (
+        session_data["id"]
+    )
+
+
+    picker_uri = (
+        session_data["pickerUri"]
+    )
+
+
+    return render_template(
+        "picker.html",
+        picker_uri=picker_uri
+    )
+
+
 
 @app.route("/picker/complete")
 def picker_complete():
 
-    from main import (
-        get_selected_photos,
-        save_photos_to_json
+    credentials = load_credentials()
+
+    session_id = session.get(
+        "picker_session_id"
     )
 
 
-    session_id = session["picker_id"]
-
-    token = session["access_token"]
-
-
-    class TempCreds:
-        def __init__(self, token):
-            self.token = token
+    if not session_id:
+        return "No picker session"
 
 
-    creds = TempCreds(token)
 
-
-    data = get_selected_photos(
-        creds,
+    photos = get_selected_media_items(
+        credentials,
         session_id
     )
 
 
-    photos = save_photos_to_json(
-        data,
-        creds
+    save_photos_json(
+        photos
     )
 
 
-    if len(photos) < 25:
-        return "צריך לפחות 25 תמונות"
+    return redirect("/gallery")
 
 
-    create_collage()
 
+@app.route("/gallery")
+def gallery():
 
-    return redirect("/")
-
-@app.route("/download")
-def download():
-
-    return send_file(
-        "static/heart_collage.png",
-        as_attachment=True,
-        download_name="heart_collage.png"
+    return render_template(
+        "gallery.html"
     )
 
 
@@ -189,5 +138,7 @@ def download():
 if __name__ == "__main__":
 
     app.run(
+        host="0.0.0.0",
+        port=5000,
         debug=True
     )
