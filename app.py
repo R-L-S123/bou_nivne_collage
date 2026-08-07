@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, request, session, url_for
 import os
 from google_photos import download_media_items
 from google_auth_oauthlib.flow import Flow
+import requests
 
 from google_photos import (
     get_authorization_url,
@@ -144,7 +145,43 @@ def gallery():
         "gallery.html"
     )
 
+@app.route("/picker/status")
+def picker_status():
 
+    credentials = load_credentials()
+
+    session_id = session.get(
+        "picker_session_id"
+    )
+
+
+    url = (
+        f"https://photospicker.googleapis.com/v1/sessions/{session_id}"
+    )
+
+
+    headers = {
+        "Authorization":
+        f"Bearer {credentials.token}"
+    }
+
+
+    response = requests.get(
+        url,
+        headers=headers
+    )
+
+
+    data = response.json()
+
+
+    return {
+        "done":
+        data.get(
+            "mediaItemsSet",
+            False
+        )
+    }
 
 if __name__ == "__main__":
 
