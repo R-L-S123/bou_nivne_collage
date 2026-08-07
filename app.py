@@ -6,7 +6,9 @@ from flask import (
     session,
     jsonify
 )
-
+import base64
+from io import BytesIO
+from PIL import Image
 import os
 import requests
 
@@ -323,16 +325,44 @@ def generate():
         collage=result
     )
 
+@app.route("/save_image", methods=["POST"])
+def save_image():
 
+    data = request.get_json()
 
+    image = data["image"]
+
+    image = image.split(",")[1]
+
+    image = base64.b64decode(image)
+
+    img = Image.open(
+        BytesIO(image)
+    )
+
+    os.makedirs(
+        "static/output",
+        exist_ok=True
+    )
+
+    path = "static/output/collage.png"
+
+    img.save(
+        path,
+        "PNG"
+    )
+
+    return {
+        "status":"ok"
+    }
+    
 @app.route("/gallery")
 def gallery():
 
     return render_template(
-        "gallery.html"
+        "gallery.html",
+        collage="static/output/collage.png"
     )
-
-
 
 if __name__ == "__main__":
 
