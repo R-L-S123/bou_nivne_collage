@@ -91,7 +91,8 @@ def picker():
 
     return render_template(
         "picker.html",
-        picker_uri=picker_uri
+        picker_uri=picker_uri,
+        session_id=session_data["id"]
     )
 
 @app.route("/picker/complete")
