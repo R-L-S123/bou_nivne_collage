@@ -89,6 +89,42 @@ id="create">
 </button>
 
 
+<script>
+
+document
+.getElementById("create")
+.addEventListener(
+"click",
+async ()=>{
+
+
+    await fetch(
+        "/create_collage",
+        {
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(
+                {
+                    x: currentX,
+                    y: currentY
+                }
+            )
+        }
+    );
+
+
+    alert("המיקום נשמר");
+
+});
+
+
+</script>
+
+
 
 <script>
 
