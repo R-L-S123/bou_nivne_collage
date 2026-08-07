@@ -3,47 +3,71 @@
 
 <head>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>עריכת קולאז׳</title>
+<title>עריכת קולאז׳</title>
 
-    <link rel="stylesheet" href="/static/style.css">
-
-    <style>
-
-        .editor {
-            position: relative;
-            width: 90vw;
-            max-width: 600px;
-            aspect-ratio: 1;
-            margin: 30px auto;
-            overflow: hidden;
-        }
+<link rel="stylesheet" href="/static/style.css">
 
 
-        .layer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            top: 0;
-            left: 0;
-        }
+<style>
+
+.editor {
+
+    position: relative;
+    width: 90vw;
+    max-width: 600px;
+    aspect-ratio: 1;
+    margin: 30px auto;
+    overflow: hidden;
+
+}
 
 
-        #grid {
-            cursor: grab;
-            touch-action: none;
-        }
+.layer {
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    top: 0;
+    left: 0;
+    user-select: none;
+
+}
 
 
-        #mask {
-            pointer-events: none;
-        }
+#grid {
+
+    touch-action: none;
+
+}
 
 
-    </style>
+#mask {
+
+    pointer-events: none;
+
+}
+
+
+#drag-area {
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: grab;
+    z-index: 10;
+    touch-action: none;
+
+}
+
+
+</style>
+
 
 </head>
 
@@ -52,13 +76,14 @@
 
 
 <h1>
-    עריכת הקולאז׳ ❤️
+עריכת קולאז׳ ❤️
 </h1>
 
 
 <p>
-    גרור את התמונות עד שהמיקום מתאים לך
+גרור את התמונות מתחת ללב
 </p>
+
 
 
 <div class="editor">
@@ -76,53 +101,20 @@
     src="/{{ mask_path }}">
 
 
+    <div id="drag-area"></div>
+
+
 </div>
 
 
 
-<button 
+<button
 class="button"
 id="create">
 
-    צור קולאז׳
+צור קולאז׳
 
 </button>
-
-
-<script>
-
-document
-.getElementById("create")
-.addEventListener(
-"click",
-async ()=>{
-
-
-    await fetch(
-        "/create_collage",
-        {
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json"
-            },
-
-            body:JSON.stringify(
-                {
-                    x: currentX,
-                    y: currentY
-                }
-            )
-        }
-    );
-
-
-    alert("המיקום נשמר");
-
-});
-
-
-</script>
 
 
 
@@ -130,21 +122,20 @@ async ()=>{
 
 
 const grid = document.getElementById("grid");
+const dragArea = document.getElementById("drag-area");
 
 
 let dragging = false;
 
-
 let startX = 0;
 let startY = 0;
-
 
 let currentX = 0;
 let currentY = 0;
 
 
 
-function startDrag(x, y){
+function startDrag(x, y) {
 
     dragging = true;
 
@@ -155,9 +146,9 @@ function startDrag(x, y){
 
 
 
-function moveDrag(x, y){
+function moveDrag(x, y) {
 
-    if(!dragging)
+    if (!dragging)
         return;
 
 
@@ -172,7 +163,7 @@ function moveDrag(x, y){
 
 
 
-function stopDrag(){
+function stopDrag() {
 
     dragging = false;
 
@@ -180,9 +171,9 @@ function stopDrag(){
 
 
 
-// מחשב
+// עכבר
 
-grid.addEventListener(
+dragArea.addEventListener(
 "mousedown",
 (e)=>{
 
@@ -217,18 +208,16 @@ stopDrag
 
 // טלפון
 
-grid.addEventListener(
+dragArea.addEventListener(
 "touchstart",
 (e)=>{
 
     const touch = e.touches[0];
 
-
     startDrag(
         touch.clientX,
         touch.clientY
     );
-
 
 });
 
@@ -240,12 +229,10 @@ window.addEventListener(
 
     const touch = e.touches[0];
 
-
     moveDrag(
         touch.clientX,
         touch.clientY
     );
-
 
 });
 
@@ -256,6 +243,39 @@ window.addEventListener(
 stopDrag
 );
 
+
+
+document
+.getElementById("create")
+.addEventListener(
+"click",
+async ()=>{
+
+
+    await fetch(
+        "/create_collage",
+        {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(
+                {
+                    x: currentX,
+                    y: currentY
+                }
+            )
+
+        }
+    );
+
+
+    alert("המיקום נשמר");
+
+});
 
 
 </script>
