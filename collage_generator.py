@@ -12,45 +12,35 @@ def create_heart_mask(size):
         0
     )
 
-    draw = ImageDraw.Draw(mask)
+    pixels = mask.load()
 
-    points = []
 
     for y in range(size):
 
         for x in range(size):
 
-            # הופך את מערכת הצירים כדי שהלב יהיה בכיוון הנכון
+            # המרה לקואורדינטות בין -1 ל-1
             nx = (
-                x - size / 2
-            ) / (size / 2)
+                2 * x - size
+            ) / size
 
             ny = (
-                size / 2 - y
-            ) / (size / 2)
+                2 * y - size
+            ) / size
 
 
+            # נוסחת לב קלאסית
             heart = (
-                nx**2 +
-                ny**2 -
-                0.3
+                nx**2 + ny**2 - 0.3
             )**3 - (
-                nx**2 *
-                ny**3
+                nx**2 * ny**3
             )
 
 
+            # היפוך ציר Y
             if heart <= 0:
 
-                points.append(
-                    (x, y)
-                )
-
-
-    draw.polygon(
-        points,
-        fill=255
-    )
+                pixels[x, y] = 255
 
 
     return mask
@@ -186,7 +176,9 @@ def create_collage(image_paths):
     mask = create_heart_mask(
         OUTPUT_SIZE
     )
-
+    mask = mask.transpose(
+        Image.Transpose.FLIP_TOP_BOTTOM
+    )
 
     result = Image.new(
         "RGB",
