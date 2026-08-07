@@ -139,3 +139,81 @@ def save_photos_json(media_items):
             ensure_ascii=False,
             indent=4
         )
+
+def download_media_items(credentials, media_items):
+    """
+    מוריד את התמונות שנבחרו מ-Google Photos
+    """
+
+    os.makedirs(
+        "data/images",
+        exist_ok=True
+    )
+
+    downloaded = []
+
+
+    items = media_items.get(
+        "mediaItems",
+        []
+    )
+
+
+    for index, item in enumerate(items):
+
+        try:
+
+            base_url = (
+                item["mediaFile"]["baseUrl"]
+            )
+
+
+            image_url = (
+                base_url + "=w1200-h1200"
+            )
+
+
+            headers = {
+                "Authorization":
+                f"Bearer {credentials.token}"
+            }
+
+
+            response = requests.get(
+                image_url,
+                headers=headers
+            )
+
+
+            response.raise_for_status()
+
+
+            filename = (
+                f"data/images/image_{index}.jpg"
+            )
+
+
+            with open(
+                filename,
+                "wb"
+            ) as f:
+
+                f.write(
+                    response.content
+                )
+
+
+            downloaded.append(
+                filename
+            )
+
+
+        except Exception as e:
+
+            print(
+                "Failed downloading image:",
+                e
+            )
+
+
+    return downloaded
