@@ -1,8 +1,16 @@
-from flask import Flask, render_template, redirect, request, session, url_for
+from flask import (
+    Flask,
+    render_template,
+    redirect,
+    request,
+    session,
+    jsonify
+)
+
 import os
-from google_photos import download_media_items
-from google_auth_oauthlib.flow import Flow
 import requests
+
+from google_auth_oauthlib.flow import Flow
 
 from google_photos import (
     get_authorization_url,
@@ -12,7 +20,8 @@ from google_photos import (
     get_selected_media_items,
     save_photos_json,
     CLIENT_SECRET_FILE,
-    SCOPES
+    SCOPES,
+    download_media_items
 )
 
 
@@ -21,14 +30,16 @@ app = Flask(__name__)
 app.secret_key = "change-this-secret-key"
 
 
-# בשביל פיתוח מקומי בלבד
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    return render_template(
+        "index.html"
+    )
 
 
 
@@ -39,7 +50,9 @@ def login():
 
     session["state"] = state
 
-    return redirect(authorization_url)
+    return redirect(
+        authorization_url
+    )
 
 
 
@@ -50,7 +63,8 @@ def oauth_callback():
         CLIENT_SECRET_FILE,
         scopes=SCOPES,
         state=session["state"],
-        redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
+        redirect_uri=
+        "https://bou-nivne-collage.onrender.com/oauth/callback"
     )
 
 
@@ -59,10 +73,14 @@ def oauth_callback():
     )
 
 
-    save_token(flow)
+    save_token(
+        flow
+    )
 
 
-    return redirect("/picker")
+    return redirect(
+        "/picker"
+    )
 
 
 
@@ -71,8 +89,12 @@ def picker():
 
     credentials = load_credentials()
 
+
     if credentials is None:
-        return redirect("/login")
+
+        return redirect(
+            "/login"
+        )
 
 
     session_data = create_picker_session(
@@ -85,21 +107,19 @@ def picker():
     )
 
 
-    picker_uri = (
-        session_data["pickerUri"]
-    )
-
-
     return render_template(
         "picker.html",
-        picker_uri=picker_uri,
+        picker_uri=session_data["pickerUri"],
         session_id=session_data["id"]
     )
+
+
 
 @app.route("/picker/complete")
 def picker_complete():
 
     credentials = load_credentials()
+
 
     session_id = session.get(
         "picker_session_id"
@@ -107,6 +127,7 @@ def picker_complete():
 
 
     if not session_id:
+
         return "No picker session"
 
 
@@ -122,14 +143,12 @@ def picker_complete():
     )
 
 
-
     image_paths = download_media_items(
         credentials,
         photos
     )
 
 
-    # שמירת התמונות לפני מעבר לעורך
     session["image_paths"] = image_paths
 
 
@@ -140,6 +159,7 @@ def picker_complete():
         image_paths
     )
 
+
     session["grid_path"] = grid_path
 
 
@@ -147,6 +167,7 @@ def picker_complete():
     from collage_generator import save_heart_overlay
 
     overlay_path = save_heart_overlay()
+
 
     session["overlay_path"] = overlay_path
 
@@ -156,17 +177,13 @@ def picker_complete():
         "/editor"
     )
 
-@app.route("/gallery")
-def gallery():
 
-    return render_template(
-        "gallery.html"
-    )
 
 @app.route("/picker/status")
 def picker_status():
 
     credentials = load_credentials()
+
 
     session_id = session.get(
         "picker_session_id"
@@ -179,8 +196,10 @@ def picker_status():
 
 
     headers = {
+
         "Authorization":
         f"Bearer {credentials.token}"
+
     }
 
 
@@ -194,12 +213,16 @@ def picker_status():
 
 
     return {
+
         "done":
         data.get(
             "mediaItemsSet",
             False
         )
+
     }
+
+
 
 @app.route("/editor")
 def editor():
@@ -210,24 +233,37 @@ def editor():
         overlay_path=session.get("overlay_path")
     )
 
-@app.route("/create_collage", methods=["POST"])
-def create_collage_route():
+
+
+# חדש - מקבל את ה-transform האמיתי מהדפדפן
+
+@app.route("/save_transform", methods=["POST"])
+def save_transform():
 
     data = request.get_json()
 
-    x = data["x"]
-    y = data["y"]
-    scale = data["scale"]
+
+    session["grid_transform"] = data.get(
+        "transform",
+        "none"
+    )
 
 
-    session["grid_x"] = x
-    session["grid_y"] = y
-    session["grid_scale"] = scale
+    print(
+        "SAVED TRANSFORM:",
+        session["grid_transform"]
+    )
 
 
-    return {
-        "status": "ok"
-    }
+    return jsonify(
+        {
+            "status": "ok",
+            "transform":
+            session["grid_transform"]
+        }
+    )
+
+
 
 @app.route("/generate")
 def generate():
@@ -242,9 +278,9 @@ def generate():
 
     result = create_collage(
         image_paths,
-        session.get("grid_x", 0),
-        session.get("grid_y", 0),
-        session.get("grid_scale", 1)
+        0,
+        0,
+        1
     )
 
 
@@ -252,6 +288,17 @@ def generate():
         "gallery.html",
         collage=result
     )
+
+
+
+@app.route("/gallery")
+def gallery():
+
+    return render_template(
+        "gallery.html"
+    )
+
+
 
 if __name__ == "__main__":
 
