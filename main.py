@@ -1,100 +1,92 @@
-import requests
-import time
 import os
 import json
+import requests
 
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
 
+
+CLIENT_SECRET_FILE = "credentials.json"
 
 SCOPES = [
     "https://www.googleapis.com/auth/photospicker.mediaitems.readonly"
 ]
 
 
-def create_auth_flow():
+TOKEN_FILE = "token.json"
 
-    credentials_data = json.loads(
-        os.environ["GOOGLE_CREDENTIALS"]
+
+def get_authorization_url():
+    """
+    יוצר URL להתחברות Google OAuth
+    """
+
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRET_FILE,
+        scopes=SCOPES,
+        redirect_uri="http://localhost:5000/oauth/callback"
     )
 
-    flow = InstalledAppFlow.from_client_config(
-        credentials_data,
-        SCOPES,
-        redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
+    authorization_url, state = flow.authorization_url(
+        access_type="offline",
+        include_granted_scopes="true"
     )
 
-    return flow
+    return authorization_url, state
 
 
 
-def finish_authentication(code_verifier, authorization_response):
+def save_token(flow):
+    """
+    שומר את הטוקן אחרי התחברות
+    """
 
-    credentials_data = json.loads(
-        os.environ["GOOGLE_CREDENTIALS"]
+    credentials = flow.credentials
+
+    with open(TOKEN_FILE, "w") as f:
+        f.write(credentials.to_json())
+
+
+
+def load_credentials():
+    """
+    טוען התחברות קיימת
+    """
+
+    if not os.path.exists(TOKEN_FILE):
+        return None
+
+    return Credentials.from_authorized_user_file(
+        TOKEN_FILE,
+        SCOPES
     )
 
-    flow = InstalledAppFlow.from_client_config(
-        credentials_data,
-        SCOPES,
-        redirect_uri="https://bou-nivne-collage.onrender.com/oauth/callback"
-    )
-
-    flow.code_verifier = code_verifier
-
-    flow.fetch_token(
-        authorization_response=authorization_response
-    )
-
-    return flow.credentials
 
 
+def create_picker_session(credentials):
+    """
+    יוצר Session חדש של Google Photos Picker
+    """
 
-def create_picker_session(creds):
+    url = "https://photospicker.googleapis.com/v1/sessions"
+
+    headers = {
+        "Authorization": f"Bearer {credentials.token}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "pickerConfig": {
+            "mediaTypeFilter": {
+                "mediaTypes": ["PHOTO"]
+            }
+        }
+    }
 
     response = requests.post(
-        "https://photospicker.googleapis.com/v1/sessions",
-        headers={
-            "Authorization": f"Bearer {creds.token}",
-            "Content-Type": "application/json"
-        },
-        json={}
-    )
-
-    print("STATUS:", response.status_code)
-    print("BODY:", response.text)
-
-    return response
-
-
-def wait_for_selection(creds, session_id):
-
-    response = requests.get(
-
-        f"https://photospicker.googleapis.com/v1/sessions/{session_id}",
-
-        headers={
-            "Authorization": f"Bearer {creds.token}"
-        }
-    )
-
-    data = response.json()
-    
-    return data.get("mediaItemsSet", False)
-
-
-def get_selected_photos(creds, session_id):
-
-    response = requests.get(
-
-        "https://photospicker.googleapis.com/v1/mediaItems",
-
-        headers={
-            "Authorization": f"Bearer {creds.token}"
-        },
-
-        params={
-            "sessionId": session_id
-        }
+        url,
+        headers=headers,
+        json=body
     )
 
     response.raise_for_status()
@@ -103,49 +95,47 @@ def get_selected_photos(creds, session_id):
 
 
 
-def save_photos_to_json(data, creds):
+def get_selected_media_items(credentials, session_id):
+    """
+    מקבל את התמונות שהמשתמש בחר
+    """
 
-    photos = []
+    url = (
+        "https://photospicker.googleapis.com/v1/"
+        f"mediaItems?sessionId={session_id}"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {credentials.token}"
+    }
+
+    response = requests.get(
+        url,
+        headers=headers
+    )
+
+    response.raise_for_status()
+
+    return response.json()
 
 
-    for photo in data.get("mediaItems", []):
 
-        media_file = photo.get("mediaFile", {})
+def save_photos_json(media_items):
+    """
+    שומר את התמונות לקובץ
+    """
 
-        photos.append({
-
-            "id": photo.get("id"),
-
-            "date": photo.get("createTime"),
-
-            "url": media_file.get("baseUrl"),
-
-            "token": creds.token,
-
-            "type": media_file.get("mimeType"),
-
-            "people": []
-
-        })
-
+    os.makedirs("data", exist_ok=True)
 
     with open(
-        "photos.json",
+        "data/photos.json",
         "w",
         encoding="utf-8"
     ) as f:
 
         json.dump(
-            photos,
+            media_items,
             f,
             ensure_ascii=False,
             indent=4
         )
-
-
-    return photos
-
-
-def import_photos(creds):
-    session = create_picker_session(creds)
-    return session
