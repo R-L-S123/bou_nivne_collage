@@ -28,66 +28,41 @@
 .layer {
 
     position: absolute;
-
     width: 100%;
     height: 100%;
-
     object-fit: contain;
 
     top: 0;
     left: 0;
 
-    user-select: none;
-
 }
-
 
 
 #grid {
 
-    z-index: 1;
+    cursor: grab;
     touch-action: none;
 
 }
 
 
-
 #overlay {
 
-    z-index: 2;
     pointer-events: none;
 
 }
 
 
-
 #drag-area {
 
     position: absolute;
-
-    width: 100%;
-    height: 100%;
-
-    top: 0;
-    left: 0;
-
-    z-index: 3;
-
-    cursor: grab;
-
-    touch-action: none;
-
-}
-
-
-#drag-area:active {
-
-    cursor: grabbing;
+    inset: 0;
 
 }
 
 
 </style>
+
 
 </head>
 
@@ -95,33 +70,22 @@
 <body>
 
 
-<h1>
-עריכת הקולאז׳ ❤️
-</h1>
-
-
-<p>
-הזז והגדל את התמונות בתוך הלב
-</p>
-
-
-
 <div class="editor">
 
 
-    <img
-    id="grid"
-    class="layer"
-    src="/{{ grid_path }}">
+<img
+id="grid"
+class="layer"
+src="/{{ grid_path }}">
 
 
-    <img
-    id="overlay"
-    class="layer"
-    src="/{{ overlay_path }}">
+<img
+id="overlay"
+class="layer"
+src="/{{ overlay_path }}">
 
 
-    <div id="drag-area"></div>
+<div id="drag-area"></div>
 
 
 </div>
@@ -129,8 +93,8 @@
 
 
 <button
-class="button"
-id="create">
+id="create"
+class="button">
 
 צור קולאז׳
 
@@ -141,329 +105,43 @@ id="create">
 <script>
 
 
-const grid = document.getElementById("grid");
-const dragArea = document.getElementById("drag-area");
-
-
-
-let dragging = false;
-
-
-let startX = 0;
-let startY = 0;
-
-
-let currentX = 0;
-let currentY = 0;
-
-
-let currentScale = 1;
-
-
-
-function updateTransform(){
-
-    grid.style.transform =
-    `
-    translate(${currentX}px, ${currentY}px)
-    scale(${currentScale})
-    `;
-
-}
-
-
-
-// ----------------
-// גרירה
-// ----------------
-
-
-function startDrag(x,y){
-
-    dragging = true;
-
-    startX = x - currentX;
-    startY = y - currentY;
-
-}
-
-
-
-function moveDrag(x,y){
-
-    if(!dragging)
-        return;
-
-
-    currentX = x - startX;
-    currentY = y - startY;
-
-
-    updateTransform();
-
-}
-
-
-
-function stopDrag(){
-
-    dragging = false;
-
-}
-
-
-
-// עכבר
-
-dragArea.addEventListener(
-"mousedown",
-(e)=>{
-
-    startDrag(
-        e.clientX,
-        e.clientY
-    );
-
-});
-
-
-
-window.addEventListener(
-"mousemove",
-(e)=>{
-
-    moveDrag(
-        e.clientX,
-        e.clientY
-    );
-
-});
-
-
-
-window.addEventListener(
-"mouseup",
-stopDrag
-);
-
-
-
-
-// ----------------
-// זום מחשב - גלגלת
-// ----------------
-
-
-document
-.querySelector(".editor")
-.addEventListener(
-"wheel",
-(e)=>{
-
-
-    e.preventDefault();
-
-
-    if(e.deltaY < 0){
-
-        currentScale += 0.05;
-
-    }
-    else{
-
-        currentScale -= 0.05;
-
-    }
-
-
-    if(currentScale < 0.5)
-        currentScale = 0.5;
-
-
-    if(currentScale > 3)
-        currentScale = 3;
-
-
-
-    updateTransform();
-
-
-},
-{
-    passive:false
-});
-
-
-
-
-// ----------------
-// טלפון - גרירה + pinch zoom
-// ----------------
-
-
-let lastDistance = null;
-
-
-dragArea.addEventListener(
-"touchstart",
-(e)=>{
-
-
-    if(e.touches.length === 1){
-
-        startDrag(
-            e.touches[0].clientX,
-            e.touches[0].clientY
-        );
-
-    }
-
-
-    if(e.touches.length === 2){
-
-        lastDistance =
-        getDistance(
-            e.touches[0],
-            e.touches[1]
-        );
-
-    }
-
-
-});
-
-
-
-window.addEventListener(
-"touchmove",
-(e)=>{
-
-
-    e.preventDefault();
-
-
-
-    if(e.touches.length === 1 && dragging){
-
-        moveDrag(
-            e.touches[0].clientX,
-            e.touches[0].clientY
-        );
-
-    }
-
-
-
-    if(e.touches.length === 2){
-
-
-        let distance =
-        getDistance(
-            e.touches[0],
-            e.touches[1]
-        );
-
-
-
-        if(lastDistance){
-
-
-            let diff =
-            distance - lastDistance;
-
-
-
-            currentScale += diff * 0.005;
-
-
-
-            if(currentScale < 0.5)
-                currentScale = 0.5;
-
-
-            if(currentScale > 3)
-                currentScale = 3;
-
-
-
-            updateTransform();
-
-
-        }
-
-
-
-        lastDistance = distance;
-
-
-    }
-
-
-},
-{
-    passive:false
-});
-
-
-
-window.addEventListener(
-"touchend",
-()=>{
-
-    dragging = false;
-    lastDistance = null;
-
-});
-
-
-
-
-
-function getDistance(a,b){
-
-    return Math.sqrt(
-        Math.pow(
-            a.clientX - b.clientX,
-            2
-        )
-        +
-        Math.pow(
-            a.clientY - b.clientY,
-            2
-        )
-    );
-
-}
-
-
-
-// ----------------
-// שמירה
-// ----------------
-
 document
 .getElementById("create")
 .addEventListener(
 "click",
-async ()=>{
+async function(){
+
+
+    const grid = document.getElementById("grid");
+
+
+    // לוקח את ה-transform האמיתי מהדפדפן
+
+    const transform =
+        getComputedStyle(grid).transform;
+
+
+
+    console.log(
+        "TRANSFORM:",
+        transform
+    );
+
 
 
     await fetch(
-        "/create_collage",
+        "/save_transform",
         {
 
-            method:"POST",
+            method: "POST",
 
-            headers:{
-                "Content-Type":"application/json"
+            headers: {
+                "Content-Type": "application/json"
             },
 
-
-            body:JSON.stringify(
+            body: JSON.stringify(
                 {
-                    x: currentX,
-                    y: currentY,
-                    scale: currentScale
+                    transform: transform
                 }
             )
 
@@ -471,10 +149,13 @@ async ()=>{
     );
 
 
+
     window.location.href =
-    "/generate";
+        "/generate";
+
 
 });
+
 
 </script>
 
