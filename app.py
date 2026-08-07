@@ -217,6 +217,30 @@ def create_collage_route():
         "status": "ok"
     }
 
+@app.route("/generate")
+def generate():
+
+    from collage_generator import create_collage
+
+
+    image_paths = session.get(
+        "image_paths"
+    )
+
+
+    result = create_collage(
+        image_paths,
+        session.get("grid_x", 0),
+        session.get("grid_y", 0),
+        session.get("grid_scale", 1)
+    )
+
+
+    return render_template(
+        "gallery.html",
+        collage=result
+    )
+
 if __name__ == "__main__":
 
     app.run(
