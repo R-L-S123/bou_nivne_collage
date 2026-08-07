@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, request, session, url_for
 import os
-
+from google_photos import download_media_items
 from google_auth_oauthlib.flow import Flow
 
 from google_photos import (
@@ -94,8 +94,6 @@ def picker():
         picker_uri=picker_uri
     )
 
-
-
 @app.route("/picker/complete")
 def picker_complete():
 
@@ -122,9 +120,21 @@ def picker_complete():
     )
 
 
+    image_paths = download_media_items(
+        credentials,
+        photos
+    )
+
+
+    from collage_generator import create_collage
+
+
+    create_collage(
+        image_paths
+    )
+
+
     return redirect("/gallery")
-
-
 
 @app.route("/gallery")
 def gallery():
