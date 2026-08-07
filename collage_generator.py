@@ -217,3 +217,92 @@ def create_collage(image_paths):
     return (
         "static/output/collage.png"
     )
+
+
+def create_grid(image_paths):
+
+    images = []
+
+
+    for path in image_paths:
+
+        try:
+
+            img = Image.open(path)
+
+            img = img.convert("RGB")
+
+            images.append(img)
+
+        except Exception:
+
+            continue
+
+
+    if len(images) == 0:
+        raise Exception("No images found")
+
+
+    size = 1200
+
+
+    cols = math.ceil(
+        math.sqrt(len(images))
+    )
+
+    rows = math.ceil(
+        len(images) / cols
+    )
+
+
+    cell_width = size // cols
+    cell_height = size // rows
+
+
+    canvas = Image.new(
+        "RGB",
+        (
+            size,
+            size
+        ),
+        "white"
+    )
+
+
+    for index, img in enumerate(images):
+
+        row = index // cols
+        col = index % cols
+
+
+        img = crop_to_fill(
+            img,
+            cell_width,
+            cell_height
+        )
+
+
+        canvas.paste(
+            img,
+            (
+                col * cell_width,
+                row * cell_height
+            )
+        )
+
+
+    os.makedirs(
+        "static/temp",
+        exist_ok=True
+    )
+
+
+    path = "static/temp/grid.png"
+
+
+    canvas.save(
+        path
+    )
+
+
+    return path
